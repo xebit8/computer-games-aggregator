@@ -1,6 +1,7 @@
 const axios = require("axios");
 const cheerio = require("cheerio");
 const getAppsList = require("./get_apps_list.js");
+const { session_cookie } = require("../2auth.js");
 
 
 (async function getApps() {
@@ -26,7 +27,11 @@ async function getAppData(app) {
         await delay(2);
         const baseUrl = "https://store.steampowered.com/app/";
         console.log("Ссылка на игру:", baseUrl + app.appid);
-        const response = await axios.get(baseUrl + app.appid);
+        const response = await axios.get(baseUrl + app.appid, {
+            headers: {
+                Cookie: "wants_mature_content=1",
+            }
+        });
         const $ = cheerio.load(response.data);
         const $error = $(".error").text();
         console.log("Ошибка (если есть):", $error || "Нет");
