@@ -1,46 +1,47 @@
-const Steam = require('steam-api-web');
 const cheerio = require('cheerio');
-const steam = new Steam('06E1DB95CAB70F21DAEE9895548F969F'); //optional key
-const axios = require('axios')
+const axios = require('axios');
+//const Steam = require('steam-api-web');
+const { optional_key } = require('../2auth');
 
-//https://store.steampowered.com/app/3244360/Plant_the_Towers/
-//https://store.steampowered.com/app/{appId}/{Name}/ -нужно создавать такую ссылку
+// https://store.steampowered.com/app/3244360/Plant_the_Towers/
+// https://store.steampowered.com/app/{appId}/{Name}/ - нужно создавать такую ссылку
 
+//const steam = new Steam(optional_key); // optional key
 const filterAppList = [];
-const infOfGame = [];
-const dopContent = [];
-const noAccessGame = []
+const infOfGame = []; // Массив игр
+const dopContent = []; // Массив DLC
+const noAccessGame = []; // Массив игр без доступа
 
-const priceGames = []
+const priceGames = [];
 
 async function getSteamAppList() {
     try {
         const response = await axios.get('https://api.steampowered.com/ISteamApps/GetAppList/v2/');
         //const response = await axios.get('');
-        const appIdList = response.data.applist.apps;
+        const appIdList = response.data.applist.apps.slice(-10); // Выборка из 10 экземпляров для тестов
+        //const appIdList = response.data.applist.apps;
     
-        //appIdList.sort((a, b) => a.name.localeCompare(b.name)); //сортировка по имени игры
+        //appIdList.sort((a, b) => a.name.localeCompare(b.name)); // Сортировка по имени игры
 
         let countsId = 0;
-        // // Выводим список игр и их appId
+        // Выводим список игр и их appId
         for (let i = 0; i < appIdList.length; i++) {
             const app = appIdList[i];
             //console.log(`AppID: ${app.appid}, Name: ${app.name}`);
-            if (app.name.length!=0 && !app.name.toLowerCase().includes('test')) 
+            if (app.name.length != 0 && !app.name.toLowerCase().includes('test')) // Убираем пустые и тестовые приложения
                 {    
                 //console.log(`номер ${countsId + 1} --- AppID: ${app.appid}, Name: ${app.name}`);
                 filterAppList.push(app);
                 countsId++;
-                if (countsId ===20) {
+                if (countsId === 20) {
                     break;
                 }
             }
         }
         
-        for(let i=0;i<filterAppList.length;i++)
-            //console.log(`${i}`,filterAppList[i]) 
-
-        //console.log(countsId)
+        // for(let i = 0; i < filterAppList.length; i++)
+        //     console.log(`${i}`,filterAppList[i]) 
+        // console.log(countsId)
         return filterAppList;
        
     } catch (error) {
@@ -57,59 +58,64 @@ async function getPagesProduct(filterAppList) {
     return pages;
 }
 
-//парсер для инфы по играм(для таблички ИГРЫ)
+// Парсер для инфы по играм (для таблички ИГРЫ)
 async function parseProductPage(url, elementName, elementId) {
     try {
-        const response = await axios.get(url);
+        // Далаем паузу в 2 секунды перед каждый запросом к странице, чтобы избежать блокировку за DoS
+        const delay = seconds => new Promise(resolve => setTimeout(resolve, seconds * 1000));
+        await delay(2);
+
+        const response = await axios.get(url, { headers: { Cookie: "wants_mature_content=1" }});
         const html = response.data;
         const $ = cheerio.load(html);
 
-        let elDescription = ''; //сбрасываем переменную, потмоу что иногда бывает так, что некоторым играм приписывается чужое описание
+        let elDescription = ''; // Сбрасываем переменную, потому что иногда бывает так, что некоторым играм приписывается чужое описание
         let elReleaseData = ''; 
         let elDeveloper = '';
         let elPublisher = '';
         let elGenres = '';
         let elMinSystem = '';
         let elRecSystem = '';
-        let elSupportedOS = ''
-        if ($('.game_page_background.game').length>0) //класс который есть именно у игр
-        {
-            //здесь селекторы для извлечение инфы именно по играм. Длс, саундтреки будут автоматически уходить в другие массивы
+        let elSupportedOS = '';
 
-            //класс в котором описание,дата выхода, издатель, разработчик
+        if ($('.game_page_background.game').length > 0) // Класс который есть именно у игр
+        {
+            // Здесь селекторы для извлечение инфы именно по играм. Длс, саундтреки будут автоматически уходить в другие массивы
+
+            // Класс в котором описание,дата выхода, издатель, разработчик
             $(".glance_ctn").each((i, element) => { 
                 const $element = $(element);
                 elDescription = $element.find('.game_description_snippet').text().trim();
-                elReleaseData = $element.find('.date').text().trim()
-                elDeveloper = $element.find('.dev_row').eq(0).text().replace(/\s+/g,"")
-                elPublisher = $element.find('.dev_row').eq(1).text().replace(/\s+/g,"")
+                elReleaseData = $element.find('.date').text().trim();
+                elDeveloper = $element.find('.dev_row').eq(0).text().replace(/\s+/g,"");
+                elPublisher = $element.find('.dev_row').eq(1).text().replace(/\s+/g,"");
             });
-            //класс с жанром игры(чисто для удобства и красоты, сюда можно перенести дату выхода, издателя и разработчика), так будет немного логичнее, но в целом без разницы
-            $('.block_content_inner').each((i,element) =>{
-                const $element = $(element)
-                elGenres = $element.find('#genresAndManufacturer span').eq(0).text().trim()
+            // Класс с жанром игры (чисто для удобства и красоты, сюда можно перенести дату выхода, издателя и разработчика), так будет немного логичнее, но в целом без разницы
+            $('.block_content_inner').each((i,element) => {
+                const $element = $(element);
+                elGenres = $element.find('#genresAndManufacturer span').eq(0).text().trim();
             })
-            //класс с системными требованиями + поддерживаемые OS
+            // Класс с системными требованиями + поддерживаемые OS (пока только Windows)
             $('.game_page_autocollapse.sys_req').each((i,element) => {
-                const $element = $(element)
-                if ($('.game_area_sys_req_leftCol').length>0)
+                const $element = $(element);
+                if ($('.game_area_sys_req_leftCol').length > 0)
                 {
-                    elMinSystem = $element.find('.game_area_sys_req_leftCol').eq(0).text().trim() //eq(0) -это параметры для винды, если поставить 1 - это для мака и тд
-                    elRecSystem = $element.find('.game_area_sys_req_rightCol').eq(0).text().trim()
+                    elMinSystem = $element.find('.game_area_sys_req_leftCol').eq(0).text().trim(); // eq(0) -это параметры для винды, если поставить 1 - это для мака и тд
+                    elRecSystem = $element.find('.game_area_sys_req_rightCol').eq(0).text().trim();
                 }
-                else{ elMinSystem = $element.find('.game_area_sys_req_full').eq(0).text().trim() }
+                else elMinSystem = $element.find('.game_area_sys_req_full').eq(0).text().trim();
 
-                elSupportedOS = $element.find('.sysreq_tab').text().trim().replace('+','').replace(/\s+/g,",")
-                //console.log(elSupportedOS)
+                elSupportedOS = $element.find('.sysreq_tab').text().trim().replace('+','').replace(/\s+/g,",");
+                //console.log(elSupportedOS);
             
             })            
         }
-        else //случай когда нет доступа к игре
+        else // Случай, когда нет доступа к игре
         {
             $(".page_content .pageheader").each((i, element) => {
                 const $element = $(element);
-                elError = $element.text() //.replace(/\s+/g,"")
-                //console.log(elError)
+                elError = $element.text(); // .replace(/\s+/g,"")
+                //console.log(elError);
             });
         }
 
@@ -124,7 +130,7 @@ async function parseProductPage(url, elementName, elementId) {
             genres:elGenres,
             minSystem : elMinSystem,
             recSystem: elRecSystem,
-            supportedOS: elSupportedOS || 'Windows' ,
+            supportedOS: elSupportedOS || 'Windows',
         }; 
 
        // Проверяем наличие класса .page_content .pageheader
@@ -134,9 +140,9 @@ async function parseProductPage(url, elementName, elementId) {
         noAccessGame.push(product);
        }
        else {
-            // Проверяем наличие класса .glance_details (класс который есть у доп контента)
+            // Проверяем наличие класса .glance_details (класс который есть у доп. контента)
             if ($('.glance_details').length > 0) {
-                product.description = 'dopContent'
+                product.description = 'dopContent';
                 dopContent.push(product);
             } 
             else {
@@ -148,30 +154,27 @@ async function parseProductPage(url, elementName, elementId) {
     }
 }
 
-//парсер для цен игр
+// Парсер для цен игр
 async function parsePriceProduct(url) {
     try {
         const response = await axios.get(url);
         const html = response.data;
         const $ = cheerio.load(html);
 
-        let elPrice = '' 
+        let elPrice = ''
 
-        if ($('.game_purchase_action_bg').length>0){ //класс который есть именно у игр, длс, саундтреков
-            //если ценник игры без скидки или игра бесплатная
-            if ($('.game_purchase_action_bg .game_purchase_price.price').length>0){
-
+        if ($('.game_purchase_action_bg').length > 0) { // Класс который есть именно у игр, длс, саундтреков
+            // Если ценник игры без скидки или игра бесплатная
+            if ($('.game_purchase_action_bg .game_purchase_price.price').length > 0) {
                 $(".game_purchase_price.price").each((i, element) => { 
                     const $element = $(element);
-
                     elPrice = $element.text().trim()
                 })
             }
-            //игра со скидкой
-            else{
+            // Игра со скидкой
+            else {
                 $(".game_purchase_action_bg .discount_final_price").each((i, element) => { 
                     const $element = $(element);
-
                     elPrice = $element.text().trim()
                 })
             }
@@ -189,7 +192,7 @@ async function parsePriceProduct(url) {
         }
 
         if(product.priceGame.length == 0)
-            product.priceGame = "не доступна в нашем регионе"
+            product.priceGame = "нет доступна в нашем регионе"
 
 
         priceGames.push(product)
@@ -200,8 +203,8 @@ async function parsePriceProduct(url) {
 
 
 
-//функции которые будем импортировать в бд
-//идея: можно переименовать вместо Main, сделать это чисто для таблички игр. А для данных других табличик сделать другие функции которые будем импортировать для бд
+// Функции которые будем импортировать в бд
+// Идея: можно переименовать вместо Main, сделать это чисто для таблички игр. А для данных других табличик сделать другие функции которые будем импортировать для бд
 async function infoForTableGame() {
     const filterAppList = await getSteamAppList();
     const pages = await getPagesProduct(filterAppList);
@@ -232,9 +235,9 @@ async function infoForTableGame() {
     }
 }
 
-//пример
+// Пример
 async function infoForTablePrice() {
-    //ссылка на игру + ее цена
+    // Ссылка на игру + ее цена
     const filterAppList = await getSteamAppList();
     const pages = await getPagesProduct(filterAppList);
     for (let i = 0; i < pages.length; i++) {
