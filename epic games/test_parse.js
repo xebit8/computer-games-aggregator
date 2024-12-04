@@ -15,8 +15,7 @@ query searchStoreQuery(
   $start: Int,
   $tag: String,
   $releaseDate: String,
-  $withPrice: Boolean = false,
-  $withPromotions: Boolean = false
+  $withPrice: Boolean = false
 ) {
   Catalog {
     searchStore(
@@ -36,31 +35,33 @@ query searchStoreQuery(
     ) {
       elements {
         title
-        id
         namespace
         description
-        effectiveDate
+        releaseDate
+        currentPrice
         keyImages {
           type
           url
         }
         seller {
-          id
           name
         }
-        productSlug
-        urlSlug
-        url
         tags {
-          id
-        }
-        items {
-          id
-          namespace
+          name
         }
         customAttributes {
           key
           value
+        }
+        catalogNs {
+          mappings(pageType: "productHome") {
+            pageSlug
+            pageType
+          }
+        }
+        offerMappings {
+          pageSlug
+          pageType
         }
         categories {
           path
@@ -69,48 +70,8 @@ query searchStoreQuery(
           totalPrice {
             discountPrice
             originalPrice
-            voucherDiscount
             discount
             currencyCode
-            currencyInfo {
-              decimals
-            }
-            fmtPrice(locale: $locale) {
-              originalPrice
-              discountPrice
-              intermediatePrice
-            }
-          }
-          lineOffers {
-            appliedRules {
-              id
-              endDate
-              discountSetting {
-                discountType
-              }
-            }
-          }
-        }
-        promotions(category: $category) @include(if: $withPromotions) {
-          promotionalOffers {
-            promotionalOffers {
-              startDate
-              endDate
-              discountSetting {
-                discountType
-                discountPercentage
-              }
-            }
-          }
-          upcomingPromotionalOffers {
-            promotionalOffers {
-              startDate
-              endDate
-              discountSetting {
-                discountType
-                discountPercentage
-              }
-            }
           }
         }
       }
@@ -124,29 +85,25 @@ query searchStoreQuery(
 `;
 
 const variables = {
-  "country": "US",
-  "locale": "en-US",
-  count: 10
+  country: "RU",
+  locale: "ru-RU",
+  count: 100,
+  withPrice: true,
 };
 
 (async function egs_post()
 {
-    try {
-        const response = await axios.post('https://graphql.epicgames.com/graphql', {
-        query,
-        variables
-        }, {
-        headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-        }});
-        const data = response.data.data.Catalog.searchStore.elements;
-        //console.log(data);
-        for (let data_chunk of data)
-        {
-            console.log(data_chunk);
-        }
+  try {
+    const response = await axios.post('https://graphql.epicgames.com/graphql', { query, variables});
+      const data = response.data.data.Catalog.searchStore.elements;
+      console.log(data);
+      // for (let data_chunk of data)
+      // {
+      //   console.log(data_chunk);
+      //   console.log(data_chunk);
+      // }
+      // console.log(`Found ${data.length} elements.`);
     } catch (error) {
-        console.error(error);
-    }
+      console.error(error);
+  }
 })();

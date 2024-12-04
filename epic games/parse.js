@@ -15,8 +15,7 @@ query searchStoreQuery(
   $start: Int,
   $tag: String,
   $releaseDate: String,
-  $withPrice: Boolean = false,
-  $withPromotions: Boolean = false
+  $withPrice: Boolean = false
 ) {
   Catalog {
     searchStore(
@@ -36,31 +35,33 @@ query searchStoreQuery(
     ) {
       elements {
         title
-        id
         namespace
         description
-        effectiveDate
+        releaseDate
+        currentPrice
         keyImages {
           type
           url
         }
         seller {
-          id
           name
         }
-        productSlug
-        urlSlug
-        url
         tags {
-          id
-        }
-        items {
-          id
-          namespace
+          name
         }
         customAttributes {
           key
           value
+        }
+        catalogNs {
+          mappings(pageType: "productHome") {
+            pageSlug
+            pageType
+          }
+        }
+        offerMappings {
+          pageSlug
+          pageType
         }
         categories {
           path
@@ -69,48 +70,8 @@ query searchStoreQuery(
           totalPrice {
             discountPrice
             originalPrice
-            voucherDiscount
             discount
             currencyCode
-            currencyInfo {
-              decimals
-            }
-            fmtPrice(locale: $locale) {
-              originalPrice
-              discountPrice
-              intermediatePrice
-            }
-          }
-          lineOffers {
-            appliedRules {
-              id
-              endDate
-              discountSetting {
-                discountType
-              }
-            }
-          }
-        }
-        promotions(category: $category) @include(if: $withPromotions) {
-          promotionalOffers {
-            promotionalOffers {
-              startDate
-              endDate
-              discountSetting {
-                discountType
-                discountPercentage
-              }
-            }
-          }
-          upcomingPromotionalOffers {
-            promotionalOffers {
-              startDate
-              endDate
-              discountSetting {
-                discountType
-                discountPercentage
-              }
-            }
           }
         }
       }
@@ -124,36 +85,80 @@ query searchStoreQuery(
 `;
 
 const variables = {
-  "country": "US",
-  "locale": "en-US",
-  count: 1000
+  "country": "RU",
+  "locale": "ru-RU",
+  count: 100,
+  withPrice: true,
 };
 
 (async function fetchAllGames() {
-  let allGames = [];
+  let gamesData = [];
+  const os_types = ["Windows", "Mac OS", "IOS", "Android"];
   let start = 0;
   let total = 0;
+  let index = 0;
 
   do {
     variables.start = start;
 
     try {
-      const response = await axios.post('https://graphql.epicgames.com/graphql', {
-        query,
-        variables
-      }, {
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        }
-      });
+      const response = await axios.post('https://graphql.epicgames.com/graphql', { query, variables});
 
       if (response.data && response.data.data && response.data.data.Catalog && response.data.data.Catalog.searchStore) {
         const searchStore = response.data.data.Catalog.searchStore;
-        allGames = allGames.concat(searchStore.elements);
         for (let data_chunk of searchStore.elements)
         {
-                console.log(data_chunk.title);
+          let title = data_chunk.title;
+
+          let description = "-";
+          if (title !== data_chunk.description) description = data_chunk.description;
+
+          let publisher = data_chunk.seller.name;
+
+          let tags = await getTags(data_chunk) || "-";
+
+          let logoImg = await getLogoImage(data_chunk) || "-";
+
+          let originalPrice = data_chunk.price.totalPrice.originalPrice;
+          let discountPrice = data_chunk.price.totalPrice.discountPrice;
+          let discountPercentage = 0;
+          if (originalPrice - discountPrice !== 0) discountPercentage = (originalPrice - discountPrice) / originalPrice * 100; 
+
+          let supported_os_list = [];
+          for (let tag of data_chunk.tags) {
+            if (os_types.includes(tag.name)) supported_os_list.push(tag.name);
+          }
+          let supported_os = supported_os_list.join(", ");
+
+          let offerMappings = await getOfferSlug(data_chunk) || "";
+          let catalogMappings = await getCatalogSlug(data_chunk) || "";
+          let pageSlug = "-";
+          if (offerMappings !== "") pageSlug = offerMappings; 
+          else if (offerMappings === "" && catalogMappings !== "") pageSlug = catalogMappings;
+          let url = "-";
+          if (pageSlug !== "-") url = `https://store.epicgames.com/en-US/p/${pageSlug}`;
+
+          gamesData.push({
+            "title": title,
+            "content_type": "",
+            "description": description,
+            "status": "",
+            "release_date": "",
+            "platform": "Epic Games",
+            "tags": tags,
+            "developer": "",
+            "publisher": publisher,
+            "min_system_requirements": "",
+            "recommended_system_requirements": "",
+            "supported_os": supported_os,
+            "supported_languages": "",
+            "url": url,
+            "logo_image": logoImg,
+            "price": discountPrice,
+            "discount_%": discountPercentage,
+          });
+          console.log(gamesData[index]);
+          index++;
         }
         total = searchStore.paging.total;
         start += searchStore.paging.count;
@@ -167,5 +172,58 @@ const variables = {
     }
   } while (start < total);
 
-  return allGames;
+  console.log(gamesData);
+  return gamesData;
 })();
+
+async function getOfferSlug(data_chunk)
+{
+  try {
+    let offerMappings = data_chunk.offerMappings.pageSlug;
+    return offerMappings;
+  } catch (error) {
+    console.error('Error:', error);
+    return null;
+  }
+}
+
+async function getCatalogSlug(data_chunk)
+{
+  try {
+    let catalogMappings = data_chunk.catalogNs.mappings.pageSlug;
+    return catalogMappings;
+  } catch (error) {
+    console.error('Error:', error);
+    return null;
+  }
+}
+
+async function getLogoImage(data_chunk)
+{
+  try {
+    let keyImages = data_chunk.keyImages;
+    let logoImg = "";
+    for (let keyImage of data_chunk.keyImages) {
+      if (keyImage.type === "Thumbnail") logoImg = keyImage.url;
+    }
+    return logoImg;
+  } catch (error) {
+    console.error('Error:', error);
+    return null;
+  }
+}
+
+async function getTags(data_chunk)
+{
+  try {
+    let tagsList = [];
+    for (let tag of data_chunk.tags) {
+      tagsList.push(tag.name);
+    }
+    let tags = tagsList.join(",");
+    return tags;
+  } catch (error) {
+    console.error('Error:', error);
+    return null;
+  }
+}
