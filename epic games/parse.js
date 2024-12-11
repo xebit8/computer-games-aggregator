@@ -1,5 +1,6 @@
 const axios = require('axios');
 
+
 const query = `
 query searchStoreQuery(
   $allowCountries: String,
@@ -34,6 +35,7 @@ query searchStoreQuery(
       tag: $tag
     ) {
       elements {
+        id
         title
         namespace
         description
@@ -55,8 +57,12 @@ query searchStoreQuery(
         }
         catalogNs {
           mappings(pageType: "productHome") {
+            mappings {
+              offerId
+            }
             pageSlug
             pageType
+            productId
           }
         }
         offerMappings {
@@ -87,27 +93,27 @@ query searchStoreQuery(
 const variables = {
   "country": "RU",
   "locale": "ru-RU",
-  count: 100,
+  count: 1000,
   withPrice: true,
 };
 
-(async function fetchAllGames() {
+//module.exports = 
+async function fetchAllGames() {
   let gamesData = [];
   const os_types = ["Windows", "Mac OS", "IOS", "Android"];
   let start = 0;
   let total = 0;
-  let index = 0;
+  let counter = 0;
 
   do {
     variables.start = start;
 
     try {
-      const response = await axios.post('https://graphql.epicgames.com/graphql', { query, variables});
+      const response = await axios.post('https://graphql.epicgames.com/graphql', { query, variables });
 
       if (response.data && response.data.data && response.data.data.Catalog && response.data.data.Catalog.searchStore) {
         const searchStore = response.data.data.Catalog.searchStore;
-        for (let data_chunk of searchStore.elements)
-        {
+        for (let data_chunk of searchStore.elements) {
           let title = data_chunk.title;
 
           let description = "-";
@@ -119,10 +125,10 @@ const variables = {
 
           let logoImg = await getLogoImage(data_chunk) || "-";
 
-          let originalPrice = data_chunk.price.totalPrice.originalPrice;
-          let discountPrice = data_chunk.price.totalPrice.discountPrice;
+          let originalPrice = data_chunk.price?.totalPrice?.originalPrice || 0;
+          let discountPrice = data_chunk.price?.totalPrice?.discountPrice || 0;
           let discountPercentage = 0;
-          if (originalPrice - discountPrice !== 0) discountPercentage = (originalPrice - discountPrice) / originalPrice * 100; 
+          if (originalPrice - discountPrice !== 0) discountPercentage = (originalPrice - discountPrice) / originalPrice * 100;
 
           let supported_os_list = [];
           for (let tag of data_chunk.tags) {
@@ -130,11 +136,17 @@ const variables = {
           }
           let supported_os = supported_os_list.join(", ");
 
-          let offerMappings = await getOfferSlug(data_chunk) || "";
-          let catalogMappings = await getCatalogSlug(data_chunk) || "";
+          let offerMappings = getOfferData(data_chunk);
+          let catalogMappings = getCatalogData(data_chunk);
           let pageSlug = "-";
-          if (offerMappings !== "") pageSlug = offerMappings; 
-          else if (offerMappings === "" && catalogMappings !== "") pageSlug = catalogMappings;
+          if (offerMappings.pageSlug != null) pageSlug = offerMappings.pageSlug;
+          else if (catalogMappings.pageSlug != null) pageSlug = catalogMappings.pageSlug;
+          let offerId = "-";
+          if (offerMappings.offerId != null) offerId = offerMappings.offerId;
+          else if (catalogMappings.offerId != null) offerId = catalogMappings.offerId;
+          let productId = "-";
+          if (offerMappings.productId != null) productId = offerMappings.productId;
+          else if (catalogMappings.productId != null) productId = catalogMappings.productId;
           let url = "-";
           if (pageSlug !== "-") url = `https://store.epicgames.com/en-US/p/${pageSlug}`;
 
@@ -156,9 +168,11 @@ const variables = {
             "logo_image": logoImg,
             "price": discountPrice,
             "discount_%": discountPercentage,
+            "offerId": offerId,
+            "productId": productId,
           });
-          console.log(gamesData[index]);
-          index++;
+          console.log(gamesData[counter]);
+          counter++;
         }
         total = searchStore.paging.total;
         start += searchStore.paging.count;
@@ -172,58 +186,80 @@ const variables = {
     }
   } while (start < total);
 
-  console.log(gamesData);
+  console.log(`Found ${gamesData.length} elements.`);
+  //console.log(gamesData);
   return gamesData;
-})();
-
-async function getOfferSlug(data_chunk)
-{
-  try {
-    let offerMappings = data_chunk.offerMappings.pageSlug;
-    return offerMappings;
-  } catch (error) {
-    console.error('Error:', error);
-    return null;
-  }
 }
 
-async function getCatalogSlug(data_chunk)
-{
-  try {
-    let catalogMappings = data_chunk.catalogNs.mappings.pageSlug;
-    return catalogMappings;
-  } catch (error) {
-    console.error('Error:', error);
-    return null;
+function getOfferData(data_chunk) {
+  let offer = { offerId: null, pageSlug: null, productId: null };
+  // Проверка offerMappings
+  if (data_chunk.offerMappings && data_chunk.offerMappings) {
+    const mapping = data_chunk.offerMappings[0]; // Берем первый элемент
+    if (mapping) {
+      // Проверяем, что первый элемент существует
+      if (mapping.mappings) {
+        // Проверяем, что offerId не null
+        offer.offerId = mapping.mappings.offerId;
+      } else {
+        offer.offerId = null;
+      }
+      offer.pageSlug = mapping.pageSlug;
+      offer.productId = mapping.productId;
+    } else {
+      offer.offerId, offer.pageSlug, offer.productId = null, null, null;
+    }
+  } else {
+    offer.offerId, offer.pageSlug, offer.productId = null, null, null;
   }
+  return offer;
 }
 
-async function getLogoImage(data_chunk)
-{
+function getCatalogData(data_chunk) {
+  let catalog = { offerId: null, pageSlug: null, productId: null };
+  if (data_chunk.catalogNs && data_chunk.catalogNs.mappings) {
+    const mapping = data_chunk.catalogNs.mappings[0];
+    if (mapping) {
+      if (mapping.mappings) {
+        catalog.offerId = mapping.mappings.offerId;
+      } else {
+        catalog.offerId = null;
+      }
+      catalog.pageSlug = mapping.pageSlug;
+      catalog.productId = mapping.productId;
+    } else {
+      catalog.offerId, catalog.pageSlug, catalog.productId = null, null, null;
+    }
+  } else {
+    catalog.offerId, catalog.pageSlug, catalog.productId = null, null, null;
+  }
+  return catalog;
+}
+
+async function getLogoImage(data_chunk) {
   try {
-    let keyImages = data_chunk.keyImages;
     let logoImg = "";
     for (let keyImage of data_chunk.keyImages) {
       if (keyImage.type === "Thumbnail") logoImg = keyImage.url;
     }
     return logoImg;
   } catch (error) {
-    console.error('Error:', error);
+    console.error('Error in getLogoImage:', error);
     return null;
   }
 }
 
-async function getTags(data_chunk)
-{
+async function getTags(data_chunk) {
   try {
     let tagsList = [];
     for (let tag of data_chunk.tags) {
       tagsList.push(tag.name);
     }
-    let tags = tagsList.join(",");
+    let tags = tagsList.join(", ");
     return tags;
   } catch (error) {
-    console.error('Error:', error);
+    console.error('Error in getTags:', error);
     return null;
   }
 }
+fetchAllGames();
