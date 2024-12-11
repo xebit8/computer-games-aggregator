@@ -1,0 +1,97 @@
+/* Основной контейнер */
+body, html {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  font-family: 'Lato', sans-serif;
+}
+
+.container {
+  display: flex;
+  height: 100vh; /* Занимает всю высоту экрана */
+}
+
+/* Общие стили для всех контейнеров */
+.platform-container {
+  flex: 1; /* Равномерное распределение пространства */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  text-align: center;
+}
+
+/* Стили для Steam */
+.steam-theme, .steam-theme .ui.header {
+  background-color: #1b2838;
+  color: white;
+}
+
+.steam-theme .ui.button {
+  background-color: #2185d0;
+  color: white;
+}
+
+.steam-theme .ui.button:hover {
+  background-color: #0cb3ff;
+}
+
+.steam-theme .ui.link.items .item{
+  background-color: #16202d;
+  padding: 10px;
+  text-align: left;
+}
+
+.steam-theme .ui.link.items .item .header, .steam-theme .ui.link.items .item .description{
+  color: white;
+}
+
+/* Стили для Epic Games */
+.epic-theme, .epic-theme .ui.header {
+  background-color: #1a1a1a;
+  color: white;
+}
+
+.epic-theme .ui.button {
+  background-color: #353539;
+  color: white;
+}
+
+.epic-theme .ui.button:hover {
+  background-color: #656567; 
+}
+
+.epic-theme .ui.link.items .item{
+  background-color: #232323;
+  padding: 10px;
+  text-align: left;
+}
+
+.epic-theme .ui.link.items .item .header, .epic-theme .ui.link.items .item .description{
+  color: white;
+}
+
+/* Контейнер для кнопки "Назад" */
+.back-button-container {
+  position: absolute; /* Абсолютное позиционирование */
+  top: 10px;          /* Отступ сверху */
+  left: 10px;         /* Отступ слева */
+  z-index: 1000;      /* Убедимся, что кнопка находится поверх других элементов */
+}
+
+/* Основной контейнер */
+.main-container {
+  margin-top: 50px;
+  text-align: center;
+}
+
+.menu-section {
+  margin-top: 30px;
+}
+
+.menu-section .ui.button {
+  margin: 10px;
+  width: 200px;
+  font-size: 16px;
+}
