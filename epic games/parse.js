@@ -97,8 +97,7 @@ const variables = {
   withPrice: true,
 };
 
-//module.exports = 
-async function fetchAllGames() {
+module.exports = async function fetchAllGames() {
   let gamesData = [];
   const os_types = ["Windows", "Mac OS", "IOS", "Android"];
   let start = 0;
@@ -152,18 +151,18 @@ async function fetchAllGames() {
 
           gamesData.push({
             "title": title,
-            "content_type": "",
+            "content_type": null,
             "description": description,
-            "status": "",
-            "release_date": "",
+            "status": null,
+            "release_date": null,
             "platform": "Epic Games",
             "tags": tags,
-            "developer": "",
+            "developer": null,
             "publisher": publisher,
-            "min_system_requirements": "",
-            "recommended_system_requirements": "",
+            "min_system_requirements": null,
+            "recommended_system_requirements": null,
             "supported_os": supported_os,
-            "supported_languages": "",
+            "supported_languages": null,
             "url": url,
             "logo_image": logoImg,
             "price": discountPrice,
