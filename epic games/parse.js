@@ -93,19 +93,19 @@ query searchStoreQuery(
 const variables = {
   "country": "RU",
   "locale": "ru-RU",
-  count: 1000,
+  count: 100,
   withPrice: true,
 };
 
 module.exports = async function fetchAllGames() {
   let gamesData = [];
   const os_types = ["Windows", "Mac OS", "IOS", "Android"];
-  let start = 0;
-  let total = 0;
+  // let start = 0;
+  // let total = 0;
   let counter = 0;
 
   do {
-    variables.start = start;
+    // variables.start = start;
 
     try {
       const response = await axios.post('https://graphql.epicgames.com/graphql', { query, variables });
@@ -173,8 +173,8 @@ module.exports = async function fetchAllGames() {
           console.log(gamesData[counter]);
           counter++;
         }
-        total = searchStore.paging.total;
-        start += searchStore.paging.count;
+        // total = searchStore.paging.total;
+        // start += searchStore.paging.count;
       } else {
         console.error('Unexpected response structure:', response.data);
         break;
@@ -183,7 +183,7 @@ module.exports = async function fetchAllGames() {
       console.error('Error:', error);
       break;
     }
-  } while (start < total);
+  } while (counter < 100);
 
   console.log(`Found ${gamesData.length} elements.`);
   //console.log(gamesData);
@@ -261,4 +261,4 @@ async function getTags(data_chunk) {
     return null;
   }
 }
-fetchAllGames();
+//fetchAllGames();

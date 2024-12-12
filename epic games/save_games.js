@@ -1,5 +1,5 @@
 const sequelize = require("../general/sequelize");
-const { EpicGame, EpicPrice, EpicTopSeller, Content_type, Developer, Platform, Publisher } = require("../general/models");
+const { EpicGame, EpicPrice, EpicTopSeller, ContentType, Developer, Platform, Publisher } = require("../general/models");
 const fetchAllGames = require("./parse.js");
 
 
@@ -17,27 +17,35 @@ const fetchAllGames = require("./parse.js");
         const platforms = new Map();
         const prices = new Map();
 
-        games.forEach((element, index) => {
-            developers.get(element.developer) || fillDevelopers(developers, element, index);
-            publishers.get(element.publisher) || fillPublishers(publishers, element, index);
-            contentTypes.get(element.content_type) || fillContentTypes(contentTypes, element, index);
-            platforms.get(element.platform) || fillPlatforms(platforms, element, index);
-        });
+        for (let game of games)
+        {
+            if (!developers.has(game.developer)) {
+                await fillDevelopers(developers, game);
+            }
+            if (!publishers.has(game.publisher)) {
+                await fillPublishers(publishers, game);
+            }
+            if (!contentTypes.has(game.content_type)) {
+                await fillContentTypes(contentTypes, game);
+            }
+            if (!platforms.has(game.platform)) {
+                await fillPlatforms(platforms, game);
+            }
+        }
 
-        games.forEach((element) => {
-            fillGames(element, developers, publishers, contentTypes, platforms);
-        });
+        for (let game of games) {
+            await fillGames(game, developers, publishers, contentTypes, platforms);
+        }
 
-        games.forEach((element, index) => {
-            prices.get(element.price) || fillPrices(prices, element, index)
-        })
-        
+        for (let i = 0; i < games.length; i++) {
+            await fillPrices(games[i], i+1);
+        }
         
 
     } catch (error) {
         console.error("Error!", error);
     }
-});
+})();
 
 // function arrayToUniqueEnumArray(data) {
 //     const uniques = new Set(data);
@@ -45,9 +53,9 @@ const fetchAllGames = require("./parse.js");
 //     return enumeratedArray;
 // };
 
-async function fillDevelopers(developers, element, index) {
+async function fillDevelopers(developers, element) {
     try {
-        developers.set(element.developer, index);
+        developers.set(element.developer, developers.size+1);
         await Developer.create({"name": element.developer});
 
     } catch (error) {
@@ -55,9 +63,9 @@ async function fillDevelopers(developers, element, index) {
     }
 }; 
 
-async function fillPublishers(publishers, element, index) {
+async function fillPublishers(publishers, element) {
     try {
-        publishers.set(element.publisher, index);
+        publishers.set(element.publisher, publishers.size+1);
         await Publisher.create({"name": element.publisher});
 
     } catch (error) {
@@ -65,19 +73,19 @@ async function fillPublishers(publishers, element, index) {
     }
 }; 
 
-async function fillContentTypes(contentTypes, element, index) {
+async function fillContentTypes(contentTypes, element) {
     try {
-        contentTypes.set(element.content_type, index);
-        await Content_type.create({"name": element.content_type});
+        contentTypes.set(element.content_type, contentTypes.size+1);
+        await ContentType.create({"name": element.content_type});
 
     } catch (error) {
         console.error("Error!", error);
     }
 }; 
 
-async function fillPlatforms(platforms, element, index) {
+async function fillPlatforms(platforms, element) {
     try {
-        platforms.set(element.platform, index);
+        platforms.set(element.platform, platforms.size+1);
         await Platform.create({"name": element.platform});
 
     } catch (error) {
@@ -103,19 +111,19 @@ async function fillGames(element, developers, publishers, contentTypes, platform
             "supported_languages": element.supported_languages,
             "url": element.url,
         });
-    } catch {
+        //console.log(element, publishers.get(element.publisher));
+    } catch (error) {
         console.error("Error!", error);
     }
 }
 
-async function fillPrices(prices, element, index) {
+async function fillPrices(element, index) {
     try {
-        prices.set(index, element.price);
         await EpicPrice.create({
             "game_id": index,
             "price": element.price,
         });
-    } catch {
+    } catch (error) {
         console.error("Error!", error);
     }
 }
