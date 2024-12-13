@@ -1,6 +1,8 @@
 const sequelize = require("../general/sequelize");
-const { EpicGame, EpicPrice, EpicTopSeller, ContentType, Developer, Platform, Publisher } = require("../general/models");
+const { EpicGame, EpicPrice, EpicTopGame, EpicNews, ContentType, Developer, Platform, Publisher } = require("../general/models");
 const fetchAllGames = require("./parse.js");
+const fetchTopGames = require("./parse_top_games.js");
+const fetchNews = require("./parse_news.js");
 
 
 (async function saveToDatabase() {
@@ -9,13 +11,14 @@ const fetchAllGames = require("./parse.js");
         console.log("[Epic Games] Successfully connected to database!");
 
         const games = await fetchAllGames();
+        const topGames = await fetchTopGames();
+        const news = await fetchNews();
         console.log("[Epic Games] Data was successfully scraped!");
 
         const developers = new Map();
         const publishers = new Map();
         const contentTypes = new Map();
         const platforms = new Map();
-        const prices = new Map();
 
         for (let game of games)
         {
@@ -34,11 +37,26 @@ const fetchAllGames = require("./parse.js");
         }
 
         for (let game of games) {
+            if (game.status === "-") 
+            {
+                
+                continue;
+            }
             await fillGames(game, developers, publishers, contentTypes, platforms);
         }
 
         for (let i = 0; i < games.length; i++) {
             await fillPrices(games[i], i+1);
+        }
+
+        for (let topGame of topGames) {
+            const game_id = games.findIndex(game => game.title === topGame.title);
+            if (game_id === -1) continue;
+            await fillTopGames(topGame, game_id);
+        }
+
+        for (let news_chunk of news) {
+            await fillNews(news_chunk);
         }
         
 
@@ -46,12 +64,6 @@ const fetchAllGames = require("./parse.js");
         console.error("Error!", error);
     }
 })();
-
-// function arrayToUniqueEnumArray(data) {
-//     const uniques = new Set(data);
-//     const enumeratedArray = Array.from(uniques).map((value, index) => ({index, value}));
-//     return enumeratedArray;
-// };
 
 async function fillDevelopers(developers, element) {
     try {
@@ -105,13 +117,10 @@ async function fillGames(element, developers, publishers, contentTypes, platform
             "genres": element.genres,
             "developer_id": developers.get(element.developer),
             "publisher_id": publishers.get(element.publisher),
-            "min_system_requirements": element.min_system_requirements,
-            "recommended_system_requirements": element.recommended_system_requirements,
             "supported_os": element.supported_os,
-            "supported_languages": element.supported_languages,
             "url": element.url,
         });
-        //console.log(element, publishers.get(element.publisher));
+        //console.log(element);
     } catch (error) {
         console.error("Error!", error);
     }
@@ -128,15 +137,28 @@ async function fillPrices(element, index) {
     }
 }
 
-// async function fillTopSellers() {
-//     try {
-//         await EpicTopSeller.create({
-//             "game_id": null,
-//             "position": null,
-//         });
-//     } catch {
-//         console.error("Error!", error);
-//     }
-// }
+async function fillTopGames(element, game_id) {
+    try {
+        await EpicTopGame.create({
+            "game_id": game_id,
+            "position": element.position,
+        });
+    } catch (error) {
+        console.error("Error!", error);
+    }
+}
+
+async function fillNews(element) {
+    try {
+        await EpicNews.create({
+            "title": element.title,
+            "short_description": element.short_description,
+            "url": element.url,
+        });
+    } catch (error) {
+        console.error("Error!", error);
+    }
+}
+
 
 
