@@ -43,10 +43,6 @@ body, html {
   text-align: left;
 }
 
-.steam-theme .ui.link.items .item .header, .steam-theme .ui.link.items .item .description{
-  color: white;
-}
-
 /* Стили для Epic Games */
 .epic-theme, .epic-theme .ui.header {
   background-color: #1a1a1a;
@@ -68,7 +64,11 @@ body, html {
   text-align: left;
 }
 
-.epic-theme .ui.link.items .item .header, .epic-theme .ui.link.items .item .description{
+.ui.link.items .item .header, .ui.link.items .item .description{
+  color: white;
+}
+
+.ui.very.basic.collapsing.celled.table {
   color: white;
 }
 
