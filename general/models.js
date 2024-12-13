@@ -28,14 +28,14 @@ const EpicGame = sequelize.define(
             allowNull:true
         },
         release_date:{
-            type: "varchar(20)", 
+            type: "varchar(50)", 
             allowNull:true
         },
         platform_id:{
             type: DataTypes.INTEGER,
             allowNull:true 
         },
-        tags:{
+        genres:{
             type: DataTypes.TEXT,
             allowNull:true
         },
@@ -47,20 +47,8 @@ const EpicGame = sequelize.define(
             type: DataTypes.INTEGER,
             allowNull:true
         },
-        min_system_requirements:{
-            type: DataTypes.TEXT,
-            allowNull:true
-        },
-        recommended_system_requirements:{
-            type: DataTypes.TEXT,
-            allowNull:true
-        },
-        supported_OS:{ 
-            type: "varchar(20)",
-            allowNull:true
-        },
-        supported_languages:{
-            type: DataTypes.TEXT,
+        supported_os:{ 
+            type: "varchar(30)",
             allowNull:true
         },
         url:{
@@ -92,8 +80,8 @@ const EpicPrice = sequelize.define(
     }
 );
 
-const EpicTopSeller = sequelize.define(
-    'epic_top_seller', 
+const EpicTopGame = sequelize.define(
+    'epic_top_game', 
     {
         id: {
             type: DataTypes.INTEGER,
@@ -123,7 +111,11 @@ const EpicNews = sequelize.define(
             autoIncrement: true
         },
         title: {
-            type: "varchar(100)",
+            type: DataTypes.TEXT,
+            allowNull: true
+        },
+        short_description: {
+            type: DataTypes.TEXT,
             allowNull: true
         },
         url: {
@@ -214,7 +206,7 @@ EpicGame.belongsTo(Developer, { foreignKey: 'developer_id', targetKey: 'id' });
 EpicGame.belongsTo(Publisher, { foreignKey: 'publisher_id', targetKey: 'id' });
 EpicGame.belongsTo(ContentType, { foreignKey: 'content_type_id', targetKey: 'id' });
 EpicGame.hasOne(EpicPrice, { foreignKey: 'game_id' });
-EpicGame.hasOne(EpicTopSeller, { foreignKey: 'game_id' });
+EpicGame.hasOne(EpicTopGame, { foreignKey: 'game_id' });
 
 Platform.hasMany(EpicGame, { foreignKey: 'platform_id' });
 Developer.hasMany(EpicGame, { foreignKey: 'developer_id' });
@@ -222,6 +214,6 @@ Publisher.hasMany(EpicGame, { foreignKey: 'publisher_id' });
 ContentType.hasMany(EpicGame, { foreignKey: 'content_type_id' });
 
 EpicPrice.belongsTo(EpicGame, { foreignKey: 'game_id', targetKey: 'id' });
-EpicTopSeller.belongsTo(EpicGame, { foreignKey: 'game_id', targetKey: 'id' });
+EpicTopGame.belongsTo(EpicGame, { foreignKey: 'game_id', targetKey: 'id' });
 
-module.exports = {EpicGame, EpicPrice, EpicTopSeller, EpicNews, Developer, Publisher, ContentType, Platform};
+module.exports = {EpicGame, EpicPrice, EpicTopGame, EpicNews, Developer, Publisher, ContentType, Platform};
