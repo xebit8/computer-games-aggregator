@@ -1,4 +1,5 @@
 const axios = require('axios');
+const getAdditionalGameData = require("./parse_game_additional");
 
 
 const query = `
@@ -35,9 +36,7 @@ query searchStoreQuery(
       tag: $tag
     ) {
       elements {
-        id
         title
-        namespace
         description
         releaseDate
         currentPrice
@@ -50,10 +49,6 @@ query searchStoreQuery(
         }
         tags {
           name
-        }
-        customAttributes {
-          key
-          value
         }
         catalogNs {
           mappings(pageType: "productHome") {
@@ -68,9 +63,6 @@ query searchStoreQuery(
         offerMappings {
           pageSlug
           pageType
-        }
-        categories {
-          path
         }
         price(country: $country) @include(if: $withPrice) {
           totalPrice {
@@ -93,7 +85,7 @@ query searchStoreQuery(
 const variables = {
   "country": "RU",
   "locale": "ru-RU",
-  count: 100,
+  count: 1000,
   withPrice: true,
 };
 
@@ -106,21 +98,49 @@ module.exports = async function fetchAllGames() {
 
   do {
     // variables.start = start;
-
     try {
       const response = await axios.post('https://graphql.epicgames.com/graphql', { query, variables });
 
       if (response.data && response.data.data && response.data.data.Catalog && response.data.data.Catalog.searchStore) {
         const searchStore = response.data.data.Catalog.searchStore;
         for (let data_chunk of searchStore.elements) {
+
+          console.log(counter+1);
+          counter++;
+
+          let offerMappings = getOfferData(data_chunk);
+          let catalogMappings = getCatalogData(data_chunk);
+
+          let offerId = "-";
+          if (offerMappings.offerId != null) offerId = offerMappings.offerId;
+          else if (catalogMappings.offerId != null) offerId = catalogMappings.offerId;
+
+          let productId = "-";
+          if (offerMappings.productId != null) productId = offerMappings.productId;
+          else if (catalogMappings.productId != null) productId = catalogMappings.productId;
+
+          // Skip all content without access to additional info
+          if (productId === "-" || offerId === "-") continue;
+
+          let additionalgamesData = await getAdditionalGameData(productId, offerId);
+          // Skip all content without additional data
+          // for (let key of Object.keys(additionalgamesData)) {
+          //   if (additionalgamesData[key] == null) continue;
+          // }
+
+          let pageSlug = "-";
+          if (offerMappings.pageSlug != null) pageSlug = offerMappings.pageSlug;
+          else if (catalogMappings.pageSlug != null) pageSlug = catalogMappings.pageSlug;
+
           let title = data_chunk.title;
+
+          // Skip all content without that doesn't match it's data
+          if (title !== additionalgamesData.title) continue;
 
           let description = "-";
           if (title !== data_chunk.description) description = data_chunk.description;
 
           let publisher = data_chunk.seller.name;
-
-          let tags = await getTags(data_chunk) || "-";
 
           let logoImg = await getLogoImage(data_chunk) || "-";
 
@@ -128,50 +148,28 @@ module.exports = async function fetchAllGames() {
           let discountPrice = data_chunk.price?.totalPrice?.discountPrice || 0;
           let discountPercentage = 0;
           if (originalPrice - discountPrice !== 0) discountPercentage = (originalPrice - discountPrice) / originalPrice * 100;
-
-          let supported_os_list = [];
-          for (let tag of data_chunk.tags) {
-            if (os_types.includes(tag.name)) supported_os_list.push(tag.name);
-          }
-          let supported_os = supported_os_list.join(", ");
-
-          let offerMappings = getOfferData(data_chunk);
-          let catalogMappings = getCatalogData(data_chunk);
-          let pageSlug = "-";
-          if (offerMappings.pageSlug != null) pageSlug = offerMappings.pageSlug;
-          else if (catalogMappings.pageSlug != null) pageSlug = catalogMappings.pageSlug;
-          let offerId = "-";
-          if (offerMappings.offerId != null) offerId = offerMappings.offerId;
-          else if (catalogMappings.offerId != null) offerId = catalogMappings.offerId;
-          let productId = "-";
-          if (offerMappings.productId != null) productId = offerMappings.productId;
-          else if (catalogMappings.productId != null) productId = catalogMappings.productId;
+          
           let url = "-";
-          if (pageSlug !== "-") url = `https://store.epicgames.com/en-US/p/${pageSlug}`;
+          if (pageSlug !== "-") url = `https://store.epicgames.com/ru/p/${pageSlug}`;
 
           gamesData.push({
             "title": title,
-            "content_type": null,
+            "content_type": additionalgamesData.content_type,
             "description": description,
-            "status": null,
-            "release_date": null,
+            "status": additionalgamesData.status,
+            "release_date": additionalgamesData.release_date,
             "platform": "Epic Games",
-            "tags": tags,
-            "developer": null,
+            "genres": additionalgamesData.genres,
+            "developer": additionalgamesData.developer,
             "publisher": publisher,
-            "min_system_requirements": null,
-            "recommended_system_requirements": null,
-            "supported_os": supported_os,
-            "supported_languages": null,
+            "supported_os": additionalgamesData.supported_os,
             "url": url,
             "logo_image": logoImg,
             "price": discountPrice,
             "discount_%": discountPercentage,
-            "offerId": offerId,
             "productId": productId,
+            "offerId": offerId,
           });
-          console.log(gamesData[counter]);
-          counter++;
         }
         // total = searchStore.paging.total;
         // start += searchStore.paging.count;
@@ -183,12 +181,12 @@ module.exports = async function fetchAllGames() {
       console.error('Error:', error);
       break;
     }
-  } while (counter < 100);
+  } while (counter < variables.count);
 
   console.log(`Found ${gamesData.length} elements.`);
   //console.log(gamesData);
   return gamesData;
-}
+};
 
 function getOfferData(data_chunk) {
   let offer = { offerId: null, pageSlug: null, productId: null };
