@@ -3,12 +3,12 @@ const axios = require("axios");
 
 const query = "";
 
-(async function parseNews() {
+module.exports = async function fetchNews() {
     try {
         const news = [];
         let start = 0;
         let total = 100;
-        let count = 500;
+        let count = 100;
         do {
             const response = await axios.get(`https://store-content-ipv4.ak.epicgames.com/api/ru/content/blog-posts?country=RU&locale=ru&count=${count}&start=${start}`);
             const data = response.data;
@@ -28,4 +28,4 @@ const query = "";
     } catch (error) {
         console.error("Error!", error);
     }
-})();
+};

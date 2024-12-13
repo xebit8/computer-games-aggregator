@@ -27,7 +27,7 @@ const variables = {
   slug: "most-popular",
 };
 
-module.exports = async function parseTopGames() {
+module.exports = async function fetchTopGames() {
     try {
       const topGames = [];
       const response = await axios.post('https://graphql.epicgames.com/graphql', { query, variables });
