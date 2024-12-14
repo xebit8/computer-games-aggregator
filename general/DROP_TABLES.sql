@@ -1,1 +1,1 @@
-DROP TABLE steam_games, steam_news, steam_prices, steam_top_games, epic_games, epic_news, epic_prices, epic_top_games, content_types, developers, platforms, publishers;
+DROP TABLE steam_games, steam_news, steam_prices, steam_top_games, epic_games, epic_news, epic_prices, epic_top_games, content_types, developers, platforms, publishers, favourites;

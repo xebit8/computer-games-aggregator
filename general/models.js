@@ -25,7 +25,7 @@ const SteamGame = sequelize.define(
         },
         description:{
             type: DataTypes.TEXT,
-            allowNull:true //*
+            allowNull:true
         },
         status:{
             type: DataTypes.TEXT, 
@@ -41,13 +41,13 @@ const SteamGame = sequelize.define(
         },
         genres:{
             type: DataTypes.TEXT,
-            allowNull:true //*
+            allowNull:true
         },
-        developer_id:{ //FK, **
+        developer_id:{
             type: DataTypes.INTEGER,
             allowNull:true
         },
-        publisher_id:{ //FK, **
+        publisher_id:{
             type: DataTypes.INTEGER,
             allowNull:false
         },
