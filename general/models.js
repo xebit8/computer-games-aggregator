@@ -59,7 +59,7 @@ const SteamGame = sequelize.define(
             type: DataTypes.TEXT,
             allowNull:true
         },
-        supported_OS:{ 
+        supported_os:{ 
             type: DataTypes.TEXT,
             allowNull:false
         },

@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title data-game-id="<%= game.id %>"><%= game.title %></title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.5.0/semantic.min.css">
+  <link rel="stylesheet" href="/styles.css">
+
+</head>
+<body class="epic-theme">
+  <div class="ui container main-container">
+    <h1 class="ui header">Изменить игру</h1>
+
+    <table class="ui very basic collapsing celled table">
+      <tbody>
+        <tr>
+            <td>
+              <b>Название:</b>
+            </td>
+            <td>
+              <textarea class="title" cols="50"><%= game.title %></textarea>
+            </td>
+          </tr>
+        <tr>
+          <td>
+            <b>Описание:</b>
+          </td>
+          <td>
+            <textarea class="description" cols="50" rows="5"><%= game.description %></textarea>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <b>Тип контента:</b>
+          </td>
+          <td>
+            <textarea class="content_type" cols="50"><%= content_type.name %></textarea>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <b>Дата релиза:</b>
+          </td>
+          <td>
+            <textarea class="release_date" cols="50"><%= game.release_date %></textarea>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <b>Жанры:</b>
+          </td>
+          <td>
+            <textarea class="genres" cols="50"><%= game.genres %></textarea>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <b>Разработчик:</b>
+          </td>
+          <td>
+            <textarea class="developer" cols="50"><%= developer.name %></textarea>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <b>Издатель:</b>
+          </td>
+          <td>
+            <textarea class="publisher" cols="50"><%= publisher.name %></textarea>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <b>Поддерживаемые ОС:</b>
+          </td>
+          <td>
+            <textarea class="supported_os" cols="50"><%= game.supported_os %></textarea>
+          </td>
+        </tr>
+    </table>
+
+    <a href="javascript:history.back()">
+        <button class="ui button back-button">Назад</button>
+    </a>
+    <button class="ui button update" onclick="UpdateGame()">Подтвердить</button>
+    <script>
+    const updateButton = document.querySelector('.ui.button.update');
+    updateButton.addEventListener('click', UpdateGame);
+
+    function UpdateGame() {
+        const game_id = document.querySelector('[data-game-id]').getAttribute('data-game-id');
+        const title = document.getElementsByClassName("title")[0].value;
+        const description = document.getElementsByClassName("description")[0].value;
+        const content_type = document.getElementsByClassName("content_type")[0].value;
+        const release_date = document.getElementsByClassName("release_date")[0].value;
+        const genres = document.getElementsByClassName("genres")[0].value;
+        const developer = document.getElementsByClassName("developer")[0].value;
+        const publisher = document.getElementsByClassName("publisher")[0].value;
+        const supported_os = document.getElementsByClassName("supported_os")[0].value;
+        
+        const game = {
+            "id": game_id,
+            "title": title || '-',
+            "content_type": content_type || '-',
+            "description": description || '-',
+            "release_date": release_date || '-',
+            "genres": genres || '-',
+            "platform": "Epic Games",
+            "developer": developer || '-',
+            "publisher": publisher || '-',
+            "supported_os": supported_os || '-',
+        }
+
+        fetch('/epicgames/games/update', {
+            method: 'POST',
+            headers: {
+            'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(game),
+        })
+        .then(response => response.json())
+        .then(data => {
+            alert('Игра успешно обновлена!');
+            window.history.back();
+        })
+        .catch((error) => {
+            console.error('Ошибка:', error);
+            alert('Произошла ошибка при обновлении игры.');
+        });
+    }
+    </script>
+  </div>
+</body>
+</html>

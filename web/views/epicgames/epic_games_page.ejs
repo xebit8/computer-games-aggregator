@@ -9,8 +9,8 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.5.0/semantic.min.js"></script>
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="/favourites.js"></script>
-  <script src="/sortByTitle.js"></script>
-  <script src="/filterByOS.js"></script>
+  <!-- <script src="/sortByTitle.js"></script>
+  <script src="/filterByOS.js"></script> -->
 </head>
 <body class="epic-theme">
   <div class="ui container main-container">
@@ -26,9 +26,11 @@
     </div>
 
     <div class="menu-section">
-      <a href="games/filter-by-supported-os">
-        <button class="ui button left floated filter-button">Фильтровать</button>
-      </a>
+      <div class="side-buttons-container">
+        <a href="/create(game)/epic_new_game_page.html">
+          <button class="ui button left floated create">Создать</button>
+        </a>
+      </div>
       <a href="games">
         <button class="ui button">Игры</button>
       </a>
@@ -38,9 +40,14 @@
       <a href="news">
         <button class="ui button">Новости</button>
       </a>
-      <a href="games/sort-by-title">
-        <button disabled class="ui button right floated sort-button">Сортировать</button>
-      </a>
+      <div class="side-buttons-container">
+        <a href="games/filter-by-supported-os">
+          <button disabled class="ui button right floated filter-button">Фильтровать</button>
+        </a>
+        <a href="games/sort-by-title">
+          <button disabled class="ui button right floated sort-button">Сортировать</button>
+        </a>
+      </div>
     </div>
 
     <div class="ui link items">

@@ -268,6 +268,7 @@ async function infoForTableGame() {
         const elementId = filterAppList[i].appid;
         const gameInfo = await parseProductPage(url, elementName, elementId);
         gamesData.push(gameInfo)
+        console.log(counter);
         counter++;
     }   
     // ---------------вывод---------------

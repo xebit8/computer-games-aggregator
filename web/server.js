@@ -64,6 +64,16 @@ app.post('/steam/games/create', async (req, res) => {
     "supported_languages": req.body.supported_languages,
     "supported_os": req.body.supported_os,
   });
+  res.status(200).json({ message: 'Игра успешно создана!' });
+});
+
+app.get('/steam/game/:id/update', async (req, res) => {
+  const game = await SteamGame.findByPk(req.params.id);
+  console.log(req.params.id);
+  const content_type = await ContentType.findByPk(game.content_type_id);
+  const publisher = await Publisher.findByPk(game.publisher_id);
+  const developer = await Developer.findByPk(game.developer_id);
+  res.render('steam/steam_game_update_page', { game, content_type, publisher, developer });
 });
 
 app.post('/steam/games/update', async (req, res) => {
@@ -71,7 +81,6 @@ app.post('/steam/games/update', async (req, res) => {
   const developer = await Developer.create(req.body.developer);
   const publisher = await Publisher.create(req.body.publisher);
   const platform = await Platform.create(req.body.platform);
-  const game_id = await SteamGame.findOne({attributes: ["id"], where: { title: req.body.title }});
 
   await SteamGame.update({
     "title": req.body.title,
@@ -82,15 +91,17 @@ app.post('/steam/games/update', async (req, res) => {
     "genres": req.body.genres,
     "developer_id": developer.id,
     "publisher_id": publisher.id,
+    "supported_os": req.body.supported_os,
     "min_system_requirements": req.body.min_system_requirements,
     "recommended_system_requirements": req.body.recommended_system_requirements,
     "supported_languages": req.body.supported_languages,
-    "supported_os": req.body.supported_os,
-  }, {where: { id: game_id.id }});
+  }, {where: { id: req.body.id }});
+  res.status(200).json({ message: 'Игра успешно обновлена!' });
 });
 
 app.delete("/steam/games/delete", async (req, res) => {
   await SteamGame.destroy({ where: {id: req.body.id }});
+  res.status(200).json({ message: 'Игра успешно удалена!' });
 })
 
 app.get('/steam/games/sort-by-title', async (req, res) => {
@@ -169,6 +180,16 @@ app.post('/epicgames/games/create', async (req, res) => {
     "publisher_id": publisher.id,
     "supported_os": req.body.supported_os,
   });
+  res.status(200).json({ message: 'Игра успешно создана!' });
+});
+
+app.get('/epicgames/game/:id/update', async (req, res) => {
+  const game = await EpicGame.findByPk(req.params.id);
+  console.log(req.params.id);
+  const content_type = await ContentType.findByPk(game.content_type_id);
+  const publisher = await Publisher.findByPk(game.publisher_id);
+  const developer = await Developer.findByPk(game.developer_id);
+  res.render('epicgames/epic_game_update_page', { game, content_type, publisher, developer });
 });
 
 app.post('/epicgames/games/update', async (req, res) => {
@@ -176,7 +197,6 @@ app.post('/epicgames/games/update', async (req, res) => {
   const developer = await Developer.create(req.body.developer);
   const publisher = await Publisher.create(req.body.publisher);
   const platform = await Platform.create(req.body.platform);
-  const game_id = await EpicGame.findOne({attributes: ["id"], where: { title: req.body.title }});
 
   await EpicGame.update({
     "title": req.body.title,
@@ -188,11 +208,13 @@ app.post('/epicgames/games/update', async (req, res) => {
     "developer_id": developer.id,
     "publisher_id": publisher.id,
     "supported_os": req.body.supported_os,
-  }, {where: { id: game_id.id }});
+  }, {where: { id: req.body.id }});
+  res.status(200).json({ message: 'Игра успешно обновлена!' });
 });
 
 app.delete("/epicgames/games/delete", async (req, res) => {
   await EpicGame.destroy({ where: {id: req.body.id }});
+  res.status(200).json({ message: 'Игра успешно удалена!' });
 })
 
 app.get('/epicgames/games/sort-by-title', async (req, res) => {

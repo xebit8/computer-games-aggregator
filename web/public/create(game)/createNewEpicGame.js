@@ -1,6 +1,6 @@
-document.getElementsByClassName("ui button create").onclick = AddGame;
+document.getElementsByClassName("ui button create").onclick = CreateGame;
 
-function AddGame() {
+function CreateGame() {
   const title = document.getElementsByClassName("title")[0].value;
   const description = document.getElementsByClassName("description")[0].value;
   const content_type = document.getElementsByClassName("content_type")[0].value;
@@ -11,15 +11,15 @@ function AddGame() {
   const supported_os = document.getElementsByClassName("supported_os")[0].value;
  
   const game = {
-    "title": title,
-    "content_type": content_type,
-    "description": description,
-    "release_date": release_date,
-    "genres": genres,
+    "title": title || '-',
+    "content_type": content_type || '-',
+    "description": description || '-',
+    "release_date": release_date || '-',
+    "genres": genres || '-',
     "platform": "Epic Games",
-    "developer": developer,
-    "publisher": publisher,
-    "supported_os": supported_os,
+    "developer": developer || '-',
+    "publisher": publisher || '-',
+    "supported_os": supported_os || '-',
   }
 
   fetch('/epicgames/games/create', {
@@ -32,10 +32,11 @@ function AddGame() {
   .then(response => response.json())
   .then(data => {
     console.log('Успех:', data);
-    alert('Игра успешно добавлена!');
+    alert('Игра успешно создана!');
+    window.history.back();
   })
   .catch((error) => {
     console.error('Ошибка:', error);
-    alert('Произошла ошибка при добавлении игры.');
+    alert('Произошла ошибка при создании игры.');
   });
 }

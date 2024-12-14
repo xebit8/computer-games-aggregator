@@ -39,7 +39,6 @@ const fetchNews = require("./parse_news.js");
         for (let game of games) {
             if (game.status === "-") 
             {
-                
                 continue;
             }
             await fillGames(game, developers, publishers, contentTypes, platforms);

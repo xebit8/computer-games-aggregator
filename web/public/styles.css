@@ -101,6 +101,9 @@ body, html {
 
 .menu-section {
   margin-top: 30px;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
 }
 
 .menu-section .ui.button {
@@ -145,19 +148,22 @@ body, html {
 
 .description {
   margin-top: 5px;
-  color: #666;
 }
 
 .add-to-favourite {
   margin-left: 10px;
 }
 
-.ui.button.filter-button {
+.side-buttons-container{
+  display: flex;
+  flex-direction: column;
+}
+
+.side-buttons-container .ui.button {
   max-width: 120px;
   font-size: 12px;
 }
 
-.ui.button.sort-button {
-  max-width: 120px;
-  font-size: 12px;
+td {
+  vertical-align: top;
 }

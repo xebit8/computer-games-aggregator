@@ -1,6 +1,6 @@
-document.getElementsByClassName("ui button create").onclick = AddGame;
+document.getElementsByClassName("ui button create").onclick = CreateGame;
 
-function AddGame() {
+function CreateGame() {
   const title = document.getElementsByClassName("title")[0].value;
   const description = document.getElementsByClassName("description")[0].value;
   const content_type = document.getElementsByClassName("content_type")[0].value;
@@ -14,18 +14,18 @@ function AddGame() {
   const min_system_requirements = document.getElementsByClassName("min_system_requirements")[0].value;
  
   const game = {
-    "title": title,
-    "content_type": content_type,
-    "description": description,
-    "release_date": release_date,
-    "genres": genres,
+    "title": title || '-',
+    "content_type": content_type || '-',
+    "description": description || '-',
+    "release_date": release_date || '-',
+    "genres": genres || '-',
     "platform": "Steam",
-    "developer": developer,
-    "publisher": publisher,
-    "min_system_requirements": min_system_requirements,
-    "recommended_system_requirements": recommended_system_requirements,
-    "supported_languages": supported_languages,
-    "supported_os": supported_os,
+    "developer": developer || '-',
+    "publisher": publisher || '-',
+    "min_system_requirements": min_system_requirements || '-',
+    "recommended_system_requirements": recommended_system_requirements || '-',
+    "supported_languages": supported_languages || '-',
+    "supported_os": supported_os || '-',
   }
 
   fetch('/steam/games/create', {
@@ -38,10 +38,11 @@ function AddGame() {
   .then(response => response.json())
   .then(data => {
     console.log('Успех:', data);
-    alert('Игра успешно добавлена!');
+    alert('Игра успешно создана!');
+    window.history.back();
   })
   .catch((error) => {
     console.error('Ошибка:', error);
-    alert('Произошла ошибка при добавлении игры.');
+    alert('Произошла ошибка при создании игры.');
   });
 }

@@ -10,22 +10,24 @@
 </head>
 <body class="steam-theme">
   <div class="ui container main-container">
-    <h1 class="ui header"><input value="" class="title"></input></h1>
-
-    <div class="back-button-container">
-      <a href="javascript:history.back()">
-        <button class="ui button back-button">Назад</button>
-      </a>
-    </div>
+    <h1 class="ui header">Создать новую игру</h1>
 
     <table class="ui very basic collapsing celled table">
       <tbody>
+        <tr>
+            <td>
+              <b>Название:</b>
+            </td>
+            <td>
+              <textarea class="title" cols="50"></textarea>
+            </td>
+          </tr>
         <tr>
           <td>
             <b>Описание:</b>
           </td>
           <td>
-            <input value="" class="description"></input>
+            <textarea class="description" cols="50" rows="5"></textarea>
           </td>
         </tr>
         <tr>
@@ -33,7 +35,7 @@
             <b>Тип контента:</b>
           </td>
           <td>
-            <input value="" class="content_type"></input>
+            <textarea class="content_type" cols="50"></textarea>
           </td>
         </tr>
         <tr>
@@ -41,7 +43,7 @@
             <b>Дата релиза:</b>
           </td>
           <td>
-            <input value="" class="release_date"></input>
+            <textarea class="release_date" cols="50"></textarea>
           </td>
         </tr>
         <tr>
@@ -49,7 +51,7 @@
             <b>Жанры:</b>
           </td>
           <td>
-            <input value="" class="genres"></input>
+            <textarea class="genres" cols="50"></textarea>
           </td>
         </tr>
         <tr>
@@ -57,7 +59,7 @@
             <b>Разработчик:</b>
           </td>
           <td>
-            <input value="" class="developer"></input>
+            <textarea class="developer" cols="50"></textarea>
           </td>
         </tr>
         <tr>
@@ -65,7 +67,7 @@
             <b>Издатель:</b>
           </td>
           <td>
-            <input value="" class="publisher"></input>
+            <textarea class="publisher" cols="50"></textarea>
           </td>
         </tr>
         <tr>
@@ -73,7 +75,7 @@
             <b>Поддерживаемые ОС:</b>
           </td>
           <td>
-            <input value="" class="supported_os"></input>
+            <textarea class="supported_os" cols="50"></textarea>
           </td>
         </tr>
         <tr>
@@ -81,7 +83,7 @@
             <b>Поддерживаемые языки:</b>
           </td>
           <td>
-            <input value="" class="supported_languages"></input>
+            <textarea class="supported_languages" cols="50"></textarea>
           </td>
         </tr>
         <tr>
@@ -89,7 +91,7 @@
             <b>Рекомендованные системные требования:</b>
           </td>
           <td>
-            <input value="" class="recommended_system_requirements"></input>
+            <textarea class="recommended_system_requirements" cols="50" rows="5"></textarea>
           </td>
         </tr>
         <tr>
@@ -97,14 +99,16 @@
             <b>Минимальные системные требования:</b>
           </td>
           <td>
-            <input value="" class="min_system_requirements"></input>
+            <textarea class="min_system_requirements" cols="50" rows="5"></textarea>
           </td>
         </tr>
-      </tbody>
     </table>
 
-    <button class="ui button create" onclick="AddGame()">Создать</button>
-
+    <a href="javascript:history.back()">
+      <button class="ui button back-button">Назад</button>
+    </a>
+    <button class="ui button create" onclick="CreateGame()">Подтвердить</button>
+    
   </div>
 </body>
 </html>

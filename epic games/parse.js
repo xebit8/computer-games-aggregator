@@ -85,7 +85,7 @@ query searchStoreQuery(
 const variables = {
   "country": "RU",
   "locale": "ru-RU",
-  count: 1000,
+  count: 200,
   withPrice: true,
 };
 

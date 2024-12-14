@@ -91,7 +91,7 @@ async function connectSteamGames() {
                     min_system_requirements: info.minSystem,
                     recommended_system_requirements: info.recSystem,
                     supported_languages: info.supportedLanguage,
-                    supported_OS: info.supportedOS,
+                    supported_os: info.supportedOS,
                     url: info.urlGame,
                     status: info.statusProduct
                 })
