@@ -3,40 +3,25 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Игры Steam</title>
+  <title>Избранное</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.5.0/semantic.min.css">
   <link rel="stylesheet" href="/styles.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.5.0/semantic.min.js"></script>
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-  <script src="/favourites.js"></script>
+  <script src="/remove-from-favourites.js"></script>
 </head>
-<body class="steam-theme">
+<body class="neutral-theme">
   <div class="ui container main-container">
-    <h1 class="ui header">Игры Steam</h1>
+    <h1 class="ui header">Избранное</h1>
 
     <div class="button-container">
-      <a href="../index.html">
+      <a href="javascript:history.back()">
         <button class="ui button back-button">Назад</button>
-      </a>
-      <a href="/favourites/show">
-        <button class="ui button favourite-button">Избранное</button>
-      </a>
-    </div>
-
-    <div class="menu-section">
-      <a href="games">
-        <button class="ui button">Игры</button>
-      </a>
-      <a href="top-games">
-        <button class="ui button">Самые популярные игры</button>
-      </a>
-      <a href="news">
-        <button class="ui button">Новости</button>
       </a>
     </div>
 
     <div class="ui link items">
-      <% games.forEach(game => { %>
+      <% favouriteGames.forEach(game => { %>
       <div class="item">
         <a href="games/<%= game.id %>" class="item-link">
           <div class="ui tiny image">
@@ -44,13 +29,10 @@
           </div>
           <div class="content">
             <div class="header"><%= game.title %></div>
-            <div class="description">
-              <p><%= game.description %></p>
-            </div>
           </div>
         </a>
-        <button class="ui right floated icon button add-to-favourite" data-game-id="<%= game.id %>" data-platform-id="<%= game.platform_id %>">
-          <i class="heart icon"></i>
+        <button class="ui right floated icon button remove-from-favourite" data-game-id="<%= game.game_id %>" data-platform-id="<%= game.platform_id %>">
+          <i class="trash icon"></i>
         </button>
       </div>
       <% }) %>

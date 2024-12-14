@@ -5,7 +5,7 @@ const sequelize = require("./sequelize");
 const SteamGame = sequelize.define(
     'steam_game',
     {
-        id:{ //PK 
+        id:{
             type: DataTypes.INTEGER,
             allowNull:false,
             primaryKey: true,
@@ -19,7 +19,7 @@ const SteamGame = sequelize.define(
             type: DataTypes.TEXT,
             allowNull:true  
         },
-        content_type_id:{            //тип продукта - длс,игра, саундтрек и тд
+        content_type_id:{
             type: DataTypes.INTEGER,
             allowNull:true
         },
@@ -27,15 +27,15 @@ const SteamGame = sequelize.define(
             type: DataTypes.TEXT,
             allowNull:true //*
         },
-        status:{                     //доступна, не доступна, демо, ранний доступ
+        status:{
             type: DataTypes.TEXT, 
             allowNull:true
         },
         release_date:{
-            type: DataTypes.TEXT, //починить, так как ругается на формат текста 
-            allowNull:true //*
+            type: DataTypes.TEXT, 
+            allowNull:true
         },
-        platform_id:{  //FK, **
+        platform_id:{
             type: DataTypes.INTEGER,
             allowNull:false 
         },
@@ -60,7 +60,7 @@ const SteamGame = sequelize.define(
             allowNull:true
         },
         supported_OS:{ 
-            type: DataTypes.TEXT,  //тут написано что должен быть VARCHAR(20) хз че это 
+            type: DataTypes.TEXT,
             allowNull:false
         },
         supported_languages:{
@@ -214,9 +214,6 @@ const EpicPrice = sequelize.define(
             type: "numeric(12,2)",
             allowNull: true
         }
-    }, 
-    {
-        timestamps: false,
     }
 );
 
@@ -236,9 +233,6 @@ const EpicTopGame = sequelize.define(
             type: DataTypes.INTEGER,
             allowNull: true
         }
-    }, 
-    {
-        timestamps: false,
     }
 );
 
@@ -265,7 +259,6 @@ const EpicNews = sequelize.define(
     }, 
     {
         tableName: "epic_news",
-        timestamps: false,
     }
 );
 
@@ -281,9 +274,6 @@ const Platform = sequelize.define(
             type: DataTypes.TEXT,
             allowNull: true
         }
-    }, 
-    {
-        timestamps: false
     }
 );
 
@@ -299,9 +289,6 @@ const Developer = sequelize.define(
             type: DataTypes.TEXT,
             allowNull: true
         }
-    }, 
-    {
-        timestamps: false
     }
 );
 
@@ -317,9 +304,6 @@ const Publisher = sequelize.define(
             type: DataTypes.TEXT,
             allowNull: true
         }
-    }, 
-    {
-        timestamps: false
     }
 );
 
@@ -335,9 +319,25 @@ const ContentType = sequelize.define(
             type: "varchar(30)",
             allowNull: true
         }
-    }, 
+    }
+);
+
+const Favourite = sequelize.define(
+    'favourite', 
     {
-        timestamps: false
+        id: {
+            type: DataTypes.INTEGER,
+            primaryKey: true,
+            autoIncrement: true,
+        },
+        game_id: {
+            type: DataTypes.INTEGER,
+            allowNull: true,
+        },
+        platform_id: {
+            type: DataTypes.INTEGER,
+            allowNull: true,
+        },
     }
 );
 
@@ -347,6 +347,7 @@ SteamGame.belongsTo(Publisher, { foreignKey: 'publisher_id', targetKey: 'id' });
 SteamGame.belongsTo(ContentType, { foreignKey: 'content_type_id', targetKey: 'id' });
 SteamGame.hasOne(SteamTopGame, { foreignKey: 'gameId', sourceKey: 'id' });
 SteamGame.hasOne(SteamPrice, { foreignKey: 'gameId', sourceKey: 'id' });
+SteamGame.hasOne(Favourite, { foreignKey: 'game_id', sourceKey: 'id' });
 
 SteamPrice.belongsTo(SteamGame, { foreignKey: 'gameId', targetKey: 'id' });
 SteamTopGame.belongsTo(SteamGame, { foreignKey: 'gameId', targetKey: 'id' });
@@ -357,12 +358,14 @@ EpicGame.belongsTo(Publisher, { foreignKey: 'publisher_id', targetKey: 'id' });
 EpicGame.belongsTo(ContentType, { foreignKey: 'content_type_id', targetKey: 'id' });
 EpicGame.hasOne(EpicPrice, { foreignKey: 'game_id' });
 EpicGame.hasOne(EpicTopGame, { foreignKey: 'game_id' });
+EpicGame.hasOne(Favourite, { foreignKey: 'game_id', sourceKey: 'id' });
 
 EpicPrice.belongsTo(EpicGame, { foreignKey: 'game_id', targetKey: 'id' });
 EpicTopGame.belongsTo(EpicGame, { foreignKey: 'game_id', targetKey: 'id' });
 
 Platform.hasMany(SteamGame, { foreignKey: 'platform_id' });
 Platform.hasMany(EpicGame, { foreignKey: 'platform_id' });
+Platform.hasMany(Favourite, { foreignKey: 'platform_id' });
 Developer.hasMany(SteamGame, { foreignKey: 'developer_id' });
 Developer.hasMany(EpicGame, { foreignKey: 'developer_id' });
 Publisher.hasMany(SteamGame, { foreignKey: 'publisher_id' });
@@ -370,6 +373,12 @@ Publisher.hasMany(EpicGame, { foreignKey: 'publisher_id' });
 ContentType.hasMany(SteamGame, { foreignKey: 'content_type_id' });
 ContentType.hasMany(EpicGame, { foreignKey: 'content_type_id' });
 
+Favourite.belongsTo(SteamGame, { foreignKey: 'game_id', targetKey: 'id' });
+Favourite.belongsTo(EpicGame, { foreignKey: 'game_id', targetKey: 'id' });
+Favourite.belongsTo(Platform, { foreignKey: 'platform_id', targetKey: 'id' });
+
+
 module.exports = {SteamGame, SteamPrice, SteamTopGame, SteamNews, 
                   EpicGame, EpicPrice, EpicTopGame, EpicNews, 
-                  Developer, Publisher, ContentType, Platform};
+                  Developer, Publisher, ContentType, Platform,
+                  Favourite};

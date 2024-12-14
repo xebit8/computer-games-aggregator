@@ -11,13 +11,15 @@
   <div class="ui container main-container">
     <h1 class="ui header">Новости Epic Games</h1>
 
-    <div class="back-button-container">
+    <div class="button-container">
       <a href="../index.html">
         <button class="ui button back-button">Назад</button>
       </a>
+      <a href="/favourites/show">
+        <button class="ui button favourite-button">Избранное</button>
+      </a>
     </div>
 
-    <!-- Переходы на другие страницы -->
     <div class="menu-section">
       <a href="games">
         <button class="ui button">Игры</button>
@@ -30,7 +32,6 @@
       </a>
     </div>
 
-    <!-- Список элементов-ссылок -->
     <div class="ui link items">
       <% news.forEach(article => { %>
       <a class="item" href="<%= article.url %>">
