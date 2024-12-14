@@ -3,6 +3,7 @@ const path = require('path');
 const { Op } = require("sequelize");
 const { EpicGame, SteamGame, EpicNews, SteamNews, EpicTopGame, SteamTopGame, Developer, ContentType, Publisher, Favourite, Platform } = require("../general/models");
 
+
 const app = express();
 const port = 3030;
 
@@ -18,7 +19,7 @@ app.get('/steam/games', async (req, res) => {
   res.render('steam/steam_games_page', { games });
 });
 
-app.get('/steam/games/:id', async (req, res) => {
+app.get('/steam/game/:id', async (req, res) => {
   const game = await SteamGame.findByPk(req.params.id);
   const content_type = await ContentType.findByPk(game.content_type_id);
   const publisher = await Publisher.findByPk(game.publisher_id);
@@ -43,13 +44,91 @@ app.get('/steam/news', async (req, res) => {
   res.render('steam/steam_news_page', { news });
 });
 
+app.post('/steam/games/create', async (req, res) => {
+  const content_type = await ContentType.create(req.body.content_type);
+  const developer = await Developer.create(req.body.developer);
+  const publisher = await Publisher.create(req.body.publisher);
+  const platform = await Platform.create(req.body.platform);
+
+  await SteamGame.create({
+    "title": req.body.title,
+    "content_type_id": content_type.id,
+    "description": req.body.description,
+    "release_date": req.body.release_date,
+    "platform_id": platform.id,
+    "genres": req.body.genres,
+    "developer_id": developer.id,
+    "publisher_id": publisher.id,
+    "min_system_requirements": req.body.min_system_requirements,
+    "recommended_system_requirements": req.body.recommended_system_requirements,
+    "supported_languages": req.body.supported_languages,
+    "supported_os": req.body.supported_os,
+  });
+});
+
+app.post('/steam/games/update', async (req, res) => {
+  const content_type = await ContentType.create(req.body.content_type);
+  const developer = await Developer.create(req.body.developer);
+  const publisher = await Publisher.create(req.body.publisher);
+  const platform = await Platform.create(req.body.platform);
+  const game_id = await SteamGame.findOne({attributes: ["id"], where: { title: req.body.title }});
+
+  await SteamGame.update({
+    "title": req.body.title,
+    "content_type_id": content_type.id,
+    "description": req.body.description,
+    "release_date": req.body.release_date,
+    "platform_id": platform.id,
+    "genres": req.body.genres,
+    "developer_id": developer.id,
+    "publisher_id": publisher.id,
+    "min_system_requirements": req.body.min_system_requirements,
+    "recommended_system_requirements": req.body.recommended_system_requirements,
+    "supported_languages": req.body.supported_languages,
+    "supported_os": req.body.supported_os,
+  }, {where: { id: game_id.id }});
+});
+
+app.delete("/steam/games/delete", async (req, res) => {
+  await SteamGame.destroy({ where: {id: req.body.id }});
+})
+
+app.get('/steam/games/sort-by-title', async (req, res) => {
+  try {
+    const games = await SteamGame.findAll({
+      order: [['title', 'ASC']]
+    });
+
+    res.json({ games });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Ошибка сервера' });
+  }
+});
+
+app.get('/steam/filter-by-supported-os', async (req, res) => {
+  try {
+    // Получаем игры, где supported_us равно true
+    const games = await SteamGame.findAll({
+      where: { supported_os: "Windows" } // Фильтрация по полю supported_us
+    });
+
+    // Возвращаем отфильтрованные игры
+    res.json({ games });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Ошибка сервера' });
+  }
+});
+
 app.get('/epicgames/games', async (req, res) => {
   const games = await EpicGame.findAll();
   res.render('epicgames/epic_games_page', { games });
 });
 
-app.get('/epicgames/games/:id', async (req, res) => {
+app.get('/epicgames/game/:id', async (req, res) => {
   const game = await EpicGame.findByPk(req.params.id);
+  console.log(req.params.id);
   const content_type = await ContentType.findByPk(game.content_type_id);
   const publisher = await Publisher.findByPk(game.publisher_id);
   const developer = await Developer.findByPk(game.developer_id);
@@ -71,6 +150,76 @@ app.get('/epicgames/top-games', async (req, res) => {
 app.get('/epicgames/news', async (req, res) => {
   const news = await EpicNews.findAll();
   res.render('epicgames/epic_news_page', { news });
+});
+
+app.post('/epicgames/games/create', async (req, res) => {
+  const content_type = await ContentType.create(req.body.content_type);
+  const developer = await Developer.create(req.body.developer);
+  const publisher = await Publisher.create(req.body.publisher);
+  const platform = await Platform.create(req.body.platform);
+
+  await EpicGame.create({
+    "title": req.body.title,
+    "content_type_id": content_type.id,
+    "description": req.body.description,
+    "release_date": req.body.release_date,
+    "platform_id": platform.id,
+    "genres": req.body.genres,
+    "developer_id": developer.id,
+    "publisher_id": publisher.id,
+    "supported_os": req.body.supported_os,
+  });
+});
+
+app.post('/epicgames/games/update', async (req, res) => {
+  const content_type = await ContentType.create(req.body.content_type);
+  const developer = await Developer.create(req.body.developer);
+  const publisher = await Publisher.create(req.body.publisher);
+  const platform = await Platform.create(req.body.platform);
+  const game_id = await EpicGame.findOne({attributes: ["id"], where: { title: req.body.title }});
+
+  await EpicGame.update({
+    "title": req.body.title,
+    "content_type_id": content_type.id,
+    "description": req.body.description,
+    "release_date": req.body.release_date,
+    "platform_id": platform.id,
+    "genres": req.body.genres,
+    "developer_id": developer.id,
+    "publisher_id": publisher.id,
+    "supported_os": req.body.supported_os,
+  }, {where: { id: game_id.id }});
+});
+
+app.delete("/epicgames/games/delete", async (req, res) => {
+  await EpicGame.destroy({ where: {id: req.body.id }});
+})
+
+app.get('/epicgames/games/sort-by-title', async (req, res) => {
+  try {
+    const games = await EpicGame.findAll({
+      order: [['title', 'ASC']]
+    });
+
+    res.json({ games });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Ошибка сервера' });
+  }
+});
+
+app.get('/epicgames/filter-by-supported-os', async (req, res) => {
+  try {
+    const games = await EpicGame.findAll({
+      where: { supported_os: "Windows" } // Фильтрация по полю supported_us
+    });
+
+    // Возвращаем отфильтрованные игры
+    res.json({ games });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Ошибка сервера' });
+  }
 });
 
 app.post('/favourites', async (req, res) => {

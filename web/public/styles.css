@@ -85,11 +85,13 @@ body, html {
 .back-button {
   background-color: #f0f0f0;
   color: #333;
+  width: 120px;
 }
 
 .favourite-button {
   background-color: #ff6f61;
   color: white;
+  width: 120px;
 }
 
 .main-container {
@@ -148,4 +150,14 @@ body, html {
 
 .add-to-favourite {
   margin-left: 10px;
+}
+
+.ui.button.filter-button {
+  max-width: 120px;
+  font-size: 12px;
+}
+
+.ui.button.sort-button {
+  max-width: 120px;
+  font-size: 12px;
 }

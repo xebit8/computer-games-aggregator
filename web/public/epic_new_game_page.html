@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>New Epic Games game</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.5.0/semantic.min.css">
+  <link rel="stylesheet" href="/styles.css">
+  <script src="createNewEpicGame.js"></script>
+</head>
+<body class="epic-theme">
+  <div class="ui container main-container">
+    <h1 class="ui header"><input value="" class="title"></input></h1>
+
+    <div class="back-button-container">
+      <a href="javascript:history.back()">
+        <button class="ui button back-button">Назад</button>
+      </a>
+    </div>
+
+    <table class="ui very basic collapsing celled table">
+      <tbody>
+        <tr>
+          <td>
+            <b>Описание:</b>
+          </td>
+          <td>
+            <input value="" class="description"></input>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <b>Тип контента:</b>
+          </td>
+          <td>
+            <input value="" class="content_type"></input>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <b>Дата релиза:</b>
+          </td>
+          <td>
+            <input value="" class="release_date"></input>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <b>Жанры:</b>
+          </td>
+          <td>
+            <input value="" class="genres"></input>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <b>Разработчик:</b>
+          </td>
+          <td>
+            <input value="" class="developer"></input>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <b>Издатель:</b>
+          </td>
+          <td>
+            <input value="" class="publisher"></input>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <b>Поддерживаемые ОС:</b>
+          </td>
+          <td>
+            <input value="" class="supported_os"></input>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <button class="ui button create" onclick="AddGame()">Создать</button>
+    
+  </div>
+</body>
+</html>

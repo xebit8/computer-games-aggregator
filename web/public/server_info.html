@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Информация о сервере</title>
+</head>
+<body>
+    <p id="os_version"></p>
+    <p id="platform"></p>
+    <p id="hardware"></p>
+    <script>document.getElementById("os_version").innerHTML = `Информация об ОС сервера: ${navigator.appVersion}`;
+    document.getElementById("platform").innerHTML = `Устройство сервера: ${navigator.platform}`;
+    document.getElementById("hardware").innerHTML = `Количество логических процессоров сервера: ${navigator.hardwareConcurrency}`</script>
+</body>
+</html>
