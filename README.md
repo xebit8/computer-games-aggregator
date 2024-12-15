@@ -7,7 +7,11 @@ Download the project as ZIP or clone using "git clone https://github.com/xebit8/
 
 Check if you have Node.js installed on your computer.
 
+Check if you have PostgreSQL installed on your computer.
+
 Use "npm install" to download all my dependencies from package.json.
+
+Create new database (using pgAdmin 4 for example). Change database authorization data (database name, PostgreSQL username, PostgreSQL password) in general/sequelize.js on yours.
 
 It is recommended to run project in this order:
 1. "node general/sync.js" to create tables for database.
