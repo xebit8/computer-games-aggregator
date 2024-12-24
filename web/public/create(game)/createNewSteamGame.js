@@ -3,6 +3,7 @@ document.getElementsByClassName("ui button create").onclick = CreateGame;
 function CreateGame() {
   const title = document.getElementsByClassName("title")[0].value;
   const description = document.getElementsByClassName("description")[0].value;
+  const status = document.getElementsByClassName("status")[0].value;
   const content_type = document.getElementsByClassName("content_type")[0].value;
   const release_date = document.getElementsByClassName("release_date")[0].value;
   const genres = document.getElementsByClassName("genres")[0].value;
@@ -17,6 +18,7 @@ function CreateGame() {
     "title": title || '-',
     "content_type": content_type || '-',
     "description": description || '-',
+    "status": status || '-',
     "release_date": release_date || '-',
     "genres": genres || '-',
     "developer": developer || '-',
@@ -25,7 +27,9 @@ function CreateGame() {
     "recommended_system_requirements": recommended_system_requirements || '-',
     "supported_languages": supported_languages || '-',
     "supported_os": supported_os || '-',
+    "url": '-',
   }
+  console.log(game);
 
   fetch('/steam/games/create', {
     method: 'POST',

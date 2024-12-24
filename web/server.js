@@ -44,13 +44,14 @@ app.get('/steam/news', async (req, res) => {
 });
 
 app.post('/steam/games/create', async (req, res) => {
-  const developer = await Developer.create(req.body.developer);
-  const publisher = await Publisher.create(req.body.publisher);
+  const developer = await Developer.create({ name: req.body.developer });
+  const publisher = await Publisher.create({ name: req.body.publisher });
 
   await SteamGame.create({
     "title": req.body.title,
     "content_type": req.body.content_type,
     "description": req.body.description,
+    "status": req.body.status,
     "release_date": req.body.release_date,
     "genres": req.body.genres,
     "developer_id": developer.id,
@@ -59,6 +60,7 @@ app.post('/steam/games/create', async (req, res) => {
     "recommended_system_requirements": req.body.recommended_system_requirements,
     "supported_languages": req.body.supported_languages,
     "supported_os": req.body.supported_os,
+    "url": req.body.url,
   });
   res.status(200).json({ message: 'Игра успешно создана!' });
 });
@@ -71,14 +73,14 @@ app.get('/steam/game/:id/update', async (req, res) => {
 });
 
 app.post('/steam/games/update', async (req, res) => {
-  const content_type = await ContentType.create(req.body.content_type);
-  const developer = await Developer.create(req.body.developer);
-  const publisher = await Publisher.create(req.body.publisher);
+  const developer = await Developer.create({ name: req.body.developer });
+  const publisher = await Publisher.create({ name: req.body.publisher });
 
   await SteamGame.update({
     "title": req.body.title,
     "content_type": req.body.content_type,
     "description": req.body.description,
+    "status": req.body.status,
     "release_date": req.body.release_date,
     "genres": req.body.genres,
     "developer_id": developer.id,
@@ -87,6 +89,7 @@ app.post('/steam/games/update', async (req, res) => {
     "min_system_requirements": req.body.min_system_requirements,
     "recommended_system_requirements": req.body.recommended_system_requirements,
     "supported_languages": req.body.supported_languages,
+    "url": req.body.url,
   }, {where: { id: req.body.id }});
   res.status(200).json({ message: 'Игра успешно обновлена!' });
 });
@@ -154,18 +157,20 @@ app.get('/epicgames/news', async (req, res) => {
 });
 
 app.post('/epicgames/games/create', async (req, res) => {
-  const developer = await Developer.create(req.body.developer);
-  const publisher = await Publisher.create(req.body.publisher);
+  const developer = await Developer.create({ name: req.body.developer });
+  const publisher = await Publisher.create({ name: req.body.publisher });
 
   await EpicGame.create({
     "title": req.body.title,
     "content_type": req.body.content_type,
     "description": req.body.description,
+    "status": req.body.status,
     "release_date": req.body.release_date,
     "genres": req.body.genres,
     "developer_id": developer.id,
     "publisher_id": publisher.id,
     "supported_os": req.body.supported_os,
+    "url": req.body.url,
   });
   res.status(200).json({ message: 'Игра успешно создана!' });
 });
@@ -178,18 +183,20 @@ app.get('/epicgames/game/:id/update', async (req, res) => {
 });
 
 app.post('/epicgames/games/update', async (req, res) => {
-  const developer = await Developer.create(req.body.developer);
-  const publisher = await Publisher.create(req.body.publisher);
+  const developer = await Developer.create({ name: req.body.developer });
+  const publisher = await Publisher.create({ name: req.body.publisher });
 
   await EpicGame.update({
     "title": req.body.title,
     "content_type": req.body.content_type,
     "description": req.body.description,
+    "status": req.body.status,
     "release_date": req.body.release_date,
     "genres": req.body.genres,
     "developer_id": developer.id,
     "publisher_id": publisher.id,
     "supported_os": req.body.supported_os,
+    "url": req.body.url,
   }, {where: { id: req.body.id }});
   res.status(200).json({ message: 'Игра успешно обновлена!' });
 });
@@ -247,11 +254,11 @@ app.post('/favourites', async (req, res) => {
 });
 
 app.get('/favourites/check', async (req, res) => {
-  const { game_id, platform_id } = req.query;
+  const { game_id, platform } = req.query;
 
   try {
     const existingFavourite = await Favourite.findOne({
-      where: { game_id, platform_id },
+      where: { game_id, platform },
     });
 
     if (existingFavourite) {
@@ -288,8 +295,8 @@ app.get('/favourites/show', async (req, res) => {
 
       favouriteGamesTitlesAndPlatform.push({
         game_id: game.game_id,
-        title: gameTitle ? gameTitle.title : 'Unknown',
-        platform: game.platform
+        title: gameTitle.title,
+        platform: game.platform,
       });
     }
 
@@ -301,11 +308,11 @@ app.get('/favourites/show', async (req, res) => {
 });
 
 app.delete('/favourites', async (req, res) => {
-  const { game_id, platform_id } = req.body;
+  const { game_id, platform } = req.body;
 
   try {
     const deletedRows = await Favourite.destroy({
-      where: { game_id, platform_id },
+      where: { game_id, platform },
     });
 
     if (deletedRows > 0) {

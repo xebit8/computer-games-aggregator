@@ -18,7 +18,7 @@ $(document).ready(function () {
     if (isFavourite) {
       $(this).prop('disabled', true);
     } else {
-      $(this).addClass('grey');
+      $(this).addClass('red');
     }
   });
 

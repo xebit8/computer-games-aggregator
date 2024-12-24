@@ -13,4 +13,4 @@ DROP PROCEDURE export_table_to_csv;
 DROP FUNCTION function_insert;
 DROP FUNCTION function_update;
 DROP FUNCTION function_delete;
-DROP FUNCTION filter_games_by_genre;
+DROP FUNCTION filter_games_by_genre(genres TEXT, platform TEXT);

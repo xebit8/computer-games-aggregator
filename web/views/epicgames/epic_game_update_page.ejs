@@ -32,6 +32,14 @@
         </tr>
         <tr>
           <td>
+            <b>Статус:</b>
+          </td>
+          <td>
+            <textarea class="status" cols="50"></textarea>
+          </td>
+        </tr>
+        <tr>
+          <td>
             <b>Тип контента:</b>
           </td>
           <td>
@@ -78,6 +86,14 @@
             <textarea class="supported_os" cols="50"><%= game.supported_os %></textarea>
           </td>
         </tr>
+        <tr>
+          <td>
+            <b>Ссылка на игру:</b>
+          </td>
+          <td>
+            <textarea class="url" cols="50"></textarea>
+          </td>
+        </tr>
     </table>
 
     <a href="javascript:history.back()">
@@ -92,23 +108,27 @@
         const game_id = document.querySelector('[data-game-id]').getAttribute('data-game-id');
         const title = document.getElementsByClassName("title")[0].value;
         const description = document.getElementsByClassName("description")[0].value;
+        const status = document.getElementsByClassName("status")[0].value;
         const content_type = document.getElementsByClassName("content_type")[0].value;
         const release_date = document.getElementsByClassName("release_date")[0].value;
         const genres = document.getElementsByClassName("genres")[0].value;
         const developer = document.getElementsByClassName("developer")[0].value;
         const publisher = document.getElementsByClassName("publisher")[0].value;
         const supported_os = document.getElementsByClassName("supported_os")[0].value;
+        const url = document.getElementsByClassName("url")[0].value;
         
         const game = {
             "id": game_id,
             "title": title || '-',
             "content_type": content_type || '-',
+            "status": status || '-',
             "description": description || '-',
             "release_date": release_date || '-',
             "genres": genres || '-',
             "developer": developer || '-',
             "publisher": publisher || '-',
             "supported_os": supported_os || '-',
+            "url": url | '-',
         }
 
         fetch('/epicgames/games/update', {

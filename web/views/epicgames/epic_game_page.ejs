@@ -24,6 +24,14 @@
         </tr>
         <tr>
           <td>
+            <b>Статус:</b>
+          </td>
+          <td>
+            <%= game.status %>
+          </td>
+        </tr>
+        <tr>
+          <td>
             <b>Тип контента:</b>
           </td>
           <td>
@@ -68,6 +76,14 @@
           </td>
           <td>
             <%= game.supported_os %>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <b>Ссылка на игру:</b>
+          </td>
+          <td>
+            <a href=<%= game.url %>>Перейти в магазин</a>
           </td>
         </tr>
     </table>

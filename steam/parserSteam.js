@@ -47,7 +47,7 @@ async function getPagesProduct(filterAppList) {
     const pages = [];
     for (let i = 0; i < filterAppList.length; i++) {
         const { appid, name } = filterAppList[i];
-        pages.push(`https://store.steampowered.com/app/${appid}/${encodeURIComponent(name)}/?l=russian`);
+        pages.push(`https://store.steampowered.com/app/${appid}/${encodeURIComponent(name)}/`);
     }
     return pages;
 }
@@ -147,7 +147,7 @@ async function parseProductPage(url, elementName) {
             id: counter,
             title: elementName,
             urlGame: url,
-            imageUrl:elImageUrl,
+            imageUrl: elImageUrl,
             description: elDescription,
             releaseData: elReleaseData,
             developer: elDeveloper,
@@ -159,7 +159,7 @@ async function parseProductPage(url, elementName) {
             supportedLanguage: elSupportedLanguage,
             content_type: elProductType,
             statusProduct: elStatusProduct
-        }; 
+        };
 
        // Проверяем наличие класса .page_content .pageheader
        if ($('.page_content .pageheader').length > 0) {
@@ -172,13 +172,15 @@ async function parseProductPage(url, elementName) {
             // Проверяем наличие класса .glance_details (класс который есть у доп. контента)
             if ($('.glance_details').length > 0) {
                 product.productType = 'Доп. контент'
-                product.content_type = "Downloadable content"
+                product.content_type = "Доп. контент"
                 dopContent.push(product);
             } 
             else {
                 infOfGame.push(product);
             }
         }
+
+        if (product.content_type === "") return null;
 
         return product;
     } catch (error) {
@@ -225,7 +227,6 @@ async function parsePriceProduct(url) {
         }
 
         const product = { 
-            //gameId: gameId,
             game_id: countGameId,
             priceGame: elPrice || 'ffff'
         }; 
@@ -266,6 +267,7 @@ async function infoForTableGame() {
         const elementName = filterAppList[i].name;
         const elementId = filterAppList[i].appid;
         const gameInfo = await parseProductPage(url, elementName, elementId);
+        if (gameInfo == null) continue;
         gamesData.push(gameInfo)
         console.log(counter);
         counter++;
@@ -340,78 +342,6 @@ async function infoForTableNews() {
         console.log(error.message)
     }
 }
-
-//тест новости(попытка вывода всех)
-/*
-async function getAllNewsForApp(appId, maxCount) {
-    let allNews = []; // Массив для хранения всех новостей
-    let count = maxCount; // Количество новостей за один запрос
-    let startOffset = 0; // Начальный сдвиг для пагинации
-
-    while (true) {
-        try {
-            // Запрашиваем новости с текущим сдвигом
-            const result = await steam.getNewsForApp(appId, count, 12, startOffset);
-
-            // Проверяем, есть ли новости
-            if (result.appnews && result.appnews.newsitems && result.appnews.newsitems.length > 0) {
-                allNews = allNews.concat(result.appnews.newsitems); // Добавляем новости в массив
-
-                // Если количество новостей меньше запрошенного, значит, это последняя страница
-                if (result.appnews.newsitems.length < count) {
-                    break;
-                }
-
-                // Увеличиваем сдвиг для следующего запроса
-                startOffset += count;
-            } else {
-                // Новости закончились
-                break;
-            }
-        } catch (error) {
-            console.error(`Ошибка при получении новостей для игры (AppID: ${appId}):`, error.message);
-            break;
-        }
-    }
-
-    return allNews; // Возвращаем все новости
-}
-*/
-
-/*
-async function infoForTableNews() {
-    try {
-        const filterAppList = await getSteamAppList(); // Получаем список игр
-
-        for (let i = 0; i < filterAppList.length; i++) {
-            const appId = filterAppList[i].appid;
-            const gameName = filterAppList[i].name;
-
-            try {
-                // Получаем все новости для игры
-                const allNews = await getAllNewsForApp(appId,1);
-
-                // Добавляем новости в массив
-                allNews.forEach(item => {
-                    newsGames.push({
-                        gameName: gameName, // Название игры
-                        titleNews: item.title, // Заголовок новости
-                        urlNews: item.url, // Ссылка на новость
-                        textNews: item.contents // Текст новости
-                    });
-                });
-            } catch (error) {
-                console.error(`Ошибка при обработке новостей для игры "${gameName}" (AppID: ${appId}):`, error.message);
-            }
-        }
-
-        console.log(newsGames); // Выводим все новости
-        return newsGames
-    } catch (error) {
-        console.error('Ошибка при выполнении функции infoForTableNews:', error.message);
-    }
-}
-*/
 
 //infoForTableGame();
 //infoForTablePrice()
