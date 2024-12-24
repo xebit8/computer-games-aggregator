@@ -25,7 +25,7 @@ async function parseTopGames() {
         const nameGame = $element.find('td:nth-child(3)').text().trim();
 
         const product = {
-            gameId: i + 1, 
+            game_id: i + 1, 
             position: positionGame,
             title: nameGame,
         };

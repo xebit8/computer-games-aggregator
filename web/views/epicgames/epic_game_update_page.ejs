@@ -35,7 +35,7 @@
             <b>Тип контента:</b>
           </td>
           <td>
-            <textarea class="content_type" cols="50"><%= content_type.name %></textarea>
+            <textarea class="content_type" cols="50"><%= game.content_type %></textarea>
           </td>
         </tr>
         <tr>
@@ -106,7 +106,6 @@
             "description": description || '-',
             "release_date": release_date || '-',
             "genres": genres || '-',
-            "platform": "Epic Games",
             "developer": developer || '-',
             "publisher": publisher || '-',
             "supported_os": supported_os || '-',

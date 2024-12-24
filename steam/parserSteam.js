@@ -47,14 +47,14 @@ async function getPagesProduct(filterAppList) {
     const pages = [];
     for (let i = 0; i < filterAppList.length; i++) {
         const { appid, name } = filterAppList[i];
-        pages.push(`https://store.steampowered.com/app/${appid}/${encodeURIComponent(name)}/`);
+        pages.push(`https://store.steampowered.com/app/${appid}/${encodeURIComponent(name)}/?l=russian`);
     }
     return pages;
 }
 
-let counter = 0;
+let counter = 1;
 // Парсер для инфы по играм (для таблички ИГРЫ)
-async function parseProductPage(url, elementName, elementId) {
+async function parseProductPage(url, elementName) {
     try {
         // Далаем паузу в 2 секунды перед каждым запросом к странице, чтобы избежать блокировку за DoS
         const delay = seconds => new Promise(resolve => setTimeout(resolve, seconds * 1000));
@@ -74,14 +74,14 @@ async function parseProductPage(url, elementName, elementId) {
         let elRecSystem = '';
         let elSupportedOS = '';
         let elSupportedLanguage = '';
-        let elSupLangMas =[]
+        let elSupLangMas = [];
         let elProductType = ''; // тип продукта(игра,длс,саундтрек)
         let elStatusProduct = ''
 
 
         if ($('.game_page_background.game').length > 0)
         {
-            elProductType = 'Game';
+            elProductType = 'Игра';
             // Здесь селекторы для извлечение инфы именно по играм. Длс, саундтреки будут автоматически уходить в другие массивы
 
             // Класс в котором ссылка на картинку игры, описание,дата выхода, издатель, разработчик
@@ -125,11 +125,11 @@ async function parseProductPage(url, elementName, elementId) {
 
             //класс со статусами игры
             if($('.game_area_comingsoon.game_area_bubble').length>0){
-                elStatusProduct = 'announced'
+                elStatusProduct = 'Анонсирована'
             }
             else if($('.early_access_header').length>0)
             {
-                elStatusProduct = 'Early Access Game'
+                elStatusProduct = 'Ранний доступ'
             }
             else elStatusProduct = 'Доступна'
 
@@ -157,7 +157,6 @@ async function parseProductPage(url, elementName, elementId) {
             recSystem: elRecSystem,
             supportedOS: elSupportedOS || 'Windows',
             supportedLanguage: elSupportedLanguage,
-            gamePlatform: "steam",
             content_type: elProductType,
             statusProduct: elStatusProduct
         }; 
@@ -166,13 +165,13 @@ async function parseProductPage(url, elementName, elementId) {
        if ($('.page_content .pageheader').length > 0) {
         product.description = 'без доступа к игре';
         product.supportedOS = '';
-        product.statusProduct = 'не доступна в РФ'
+        product.statusProduct = 'Недоступна'
         noAccessGame.push(product);
        }
        else {
             // Проверяем наличие класса .glance_details (класс который есть у доп. контента)
             if ($('.glance_details').length > 0) {
-                product.productType = 'Dop Content'
+                product.productType = 'Доп. контент'
                 product.content_type = "Downloadable content"
                 dopContent.push(product);
             } 
@@ -227,7 +226,7 @@ async function parsePriceProduct(url) {
 
         const product = { 
             //gameId: gameId,
-            gameId: countGameId,
+            game_id: countGameId,
             priceGame: elPrice || 'ffff'
         }; 
 

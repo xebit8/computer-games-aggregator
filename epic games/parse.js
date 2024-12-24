@@ -85,15 +85,14 @@ query searchStoreQuery(
 const variables = {
   "country": "RU",
   "locale": "ru-RU",
-  count: 200,
+  count: 1000,
   withPrice: true,
 };
 
 module.exports = async function fetchAllGames() {
   let gamesData = [];
-  const os_types = ["Windows", "Mac OS", "IOS", "Android"];
-  // let start = 0;
-  // let total = 0;
+  let start = 0;
+  let total = 0;
   let counter = 0;
 
   do {
@@ -105,8 +104,8 @@ module.exports = async function fetchAllGames() {
         const searchStore = response.data.data.Catalog.searchStore;
         for (let data_chunk of searchStore.elements) {
 
-          console.log(counter+1);
           counter++;
+          console.log(counter);
 
           let offerMappings = getOfferData(data_chunk);
           let catalogMappings = getCatalogData(data_chunk);
@@ -123,10 +122,6 @@ module.exports = async function fetchAllGames() {
           if (productId === "-" || offerId === "-") continue;
 
           let additionalgamesData = await getAdditionalGameData(productId, offerId);
-          // Skip all content without additional data
-          // for (let key of Object.keys(additionalgamesData)) {
-          //   if (additionalgamesData[key] == null) continue;
-          // }
 
           let pageSlug = "-";
           if (offerMappings.pageSlug != null) pageSlug = offerMappings.pageSlug;
@@ -142,7 +137,7 @@ module.exports = async function fetchAllGames() {
 
           let publisher = data_chunk.seller.name;
 
-          let logoImg = await getLogoImage(data_chunk) || "-";
+          let image_url = await getLogoImage(data_chunk) || "-";
 
           let originalPrice = data_chunk.price?.totalPrice?.originalPrice || 0;
           let discountPrice = data_chunk.price?.totalPrice?.discountPrice || 0;
@@ -158,21 +153,21 @@ module.exports = async function fetchAllGames() {
             "description": description,
             "status": additionalgamesData.status,
             "release_date": additionalgamesData.release_date,
-            "platform": "Epic Games",
             "genres": additionalgamesData.genres,
             "developer": additionalgamesData.developer,
             "publisher": publisher,
             "supported_os": additionalgamesData.supported_os,
             "url": url,
-            "logo_image": logoImg,
+            "image_url": image_url,
             "price": discountPrice,
-            "discount_%": discountPercentage,
-            "productId": productId,
-            "offerId": offerId,
+            // "discount_%": discountPercentage,
+            // "productId": productId,
+            // "offerId": offerId,
           });
+          console.log("Added", counter, "successfully!");
         }
-        // total = searchStore.paging.total;
-        // start += searchStore.paging.count;
+        total = searchStore.paging.total;
+        start += searchStore.paging.count;
       } else {
         console.error('Unexpected response structure:', response.data);
         break;
@@ -181,7 +176,7 @@ module.exports = async function fetchAllGames() {
       console.error('Error:', error);
       break;
     }
-  } while (counter < variables.count);
+  } while (counter < 1000);
 
   console.log(`Found ${gamesData.length} elements.`);
   //console.log(gamesData);
@@ -242,20 +237,6 @@ async function getLogoImage(data_chunk) {
     return logoImg;
   } catch (error) {
     console.error('Error in getLogoImage:', error);
-    return null;
-  }
-}
-
-async function getTags(data_chunk) {
-  try {
-    let tagsList = [];
-    for (let tag of data_chunk.tags) {
-      tagsList.push(tag.name);
-    }
-    let tags = tagsList.join(", ");
-    return tags;
-  } catch (error) {
-    console.error('Error in getTags:', error);
     return null;
   }
 }

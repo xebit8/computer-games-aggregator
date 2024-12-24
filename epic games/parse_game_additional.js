@@ -24,7 +24,7 @@ module.exports = async function getAdditionalGameData(productId, offerId) {
     if (data.errorMessage === errorMsg) {
       return {
         "title": "-",
-        "status": "Unavailable",
+        "status": "Недоступна",
         "content_type": "-",
         "genres": "-",
         "supported_os": "-",
@@ -32,13 +32,13 @@ module.exports = async function getAdditionalGameData(productId, offerId) {
         "release_date": "-",
       };
     }
-    else if (statusList.includes(data.purchase[0].status)) status = "Available";
-    else if (data.purchase[0].status === "Unavailable") status = "Announced"
+    else if (statusList.includes(data.purchase[0].status)) status = "Доступна";
+    else if (data.purchase[0].status === "Unavailable") status = "Анонсирована"
 
     let content_type = "";
-    if (data.categories.includes("games/edition/base")) content_type = "Base game";
-    else if (data.categories.includes("addons")) content_type = "DLC";
-    else if (data.categories.includes("games/demo")) content_type = "Demo";
+    if (data.categories.includes("games/edition/base")) content_type = "Игра";
+    else if (data.categories.includes("addons")) content_type = "Доп. контент";
+    else if (data.categories.includes("games/demo")) content_type = "Демо-версия";
 
     let genresList = [];
     for (let genre of data.tags.genres) {
@@ -75,7 +75,7 @@ module.exports = async function getAdditionalGameData(productId, offerId) {
       "status": status,
       "content_type": content_type,
       "genres": genres,
-      "supported_os": supported_os,
+      "supported_os": supported_os || "Windows",
       "developer": developer,
       "release_date": release_date,
     };

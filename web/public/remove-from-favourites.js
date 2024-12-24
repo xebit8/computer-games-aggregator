@@ -1,14 +1,14 @@
 $(document).ready(function () {
     // Обработчик для кнопки "Удалить из избранного"
     $('.remove-from-favourite').on('click', function () {
-      const gameId = $(this).data('game-id'); // Получаем game_id из атрибута data
-      const platformId = $(this).data('platform-id'); // Получаем platform_id из атрибута data
+      const game_id = $(this).data('game-id'); // Получаем game_id из атрибута data
+      const platform = $(this).data('platform'); // Получаем platform из атрибута data
   
       // Отправляем DELETE-запрос на сервер
       $.ajax({
         url: '/favourites',
         method: 'DELETE',
-        data: { game_id: gameId, platform_id: platformId },
+        data: { game_id: game_id, platform: platform },
         success: function (response) {
           alert('Игра удалена из избранного!');
           // Можно добавить логику для обновления интерфейса (например, удалить элемент из списка)

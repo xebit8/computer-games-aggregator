@@ -167,3 +167,7 @@ body, html {
 td {
   vertical-align: top;
 }
+
+textarea {
+  resize: none;
+}

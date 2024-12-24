@@ -1,7 +1,7 @@
 const sequelize = require('../general/sequelize')
 const {infoForTableGame,infoForTablePrice} = require('./parserSteam.js')
 const {parseTopGames} = require('./chartGameSteam.js')
-const { SteamGame, Platform, Developer, Publisher, ContentType, SteamPrice, SteamTopGame } = require('../general/models')
+const { SteamGame, Developer, Publisher, SteamPrice, SteamTopGame } = require('../general/models')
 
 async function connectSteamGames() {
     try {
@@ -14,37 +14,15 @@ async function connectSteamGames() {
         const pricesData = await infoForTablePrice()
         const topGamesData = await parseTopGames();
     
-        const platformsSet = new Set()
         const developersSet = new Set()
         const publishersSet = new Set()
-        const contentTypeSet = new Set()
         const processedGameIds = new Set();
         const processedTopGamesIds = new Set();
 
         gamesData.forEach(infoGame =>{
-            platformsSet.add(infoGame.gamePlatform)
             developersSet.add(infoGame.developer)
             publishersSet.add(infoGame.publisher)
-            contentTypeSet.add(infoGame.content_type)
         })
-
-        for (const platformName of platformsSet) {
-            const platform = await Platform.findOne({ where: { name: platformName } });
-            if (!platform) {
-                await Platform.create({ name: platformName });
-            } else {
-                await Platform.update({ name: platformName }, { where: { id: platform.id } });
-            }
-        }
-
-        for (const contentTypeName of contentTypeSet) {
-            const contentType = await ContentType.findOne({ where: { name: contentTypeName } });
-            if (!contentType) {
-                await ContentType.create({ name: contentTypeName });
-            } else {
-                await ContentType.update({ name: contentTypeName }, { where: { id: contentType.id } });
-            }
-        }
 
         for (const developerName of developersSet) {
             const developer = await Developer.findOne({ where: { name: developerName } });
@@ -67,10 +45,8 @@ async function connectSteamGames() {
         //заполнение таблиц steam_games,platform,developer, publisher, content_type       
         for(const info of gamesData)
         {
-            const platform = await Platform.findOne({ where: { name: info.gamePlatform } });
             const developer = await Developer.findOne({ where: { name: info.developer } });
             const publisher = await Publisher.findOne({ where: { name: info.publisher} });
-            const content_type = await ContentType.findOne({ where: { name: info.content_type } });
 
             const checkSteam = await SteamGame. findOne({
                 where: { title: info.title } 
@@ -78,13 +54,10 @@ async function connectSteamGames() {
             if(!checkSteam)
             {
                 await SteamGame. create({
-                    //id: info.id,
                     title: info.title,
-                    content_type_id: content_type.id,
-                    imageUrl: info.imageUrl,
+                    content_type: info.content_type,
                     description: info.description,
                     release_date: info.releaseData,
-                    platform_id: platform.id,
                     genres: info.genres,
                     developer_id: developer.id,
                     publisher_id: publisher.id,
@@ -93,29 +66,30 @@ async function connectSteamGames() {
                     supported_languages: info.supportedLanguage,
                     supported_os: info.supportedOS,
                     url: info.urlGame,
-                    status: info.statusProduct
+                    status: info.statusProduct,
+                    imageUrl: info.imageUrl,
                 })
             }
         }
 
         //заполнение таблицы SteamPrice
         for (const priceInfo of pricesData) {
-            if (priceInfo.gameId && !processedGameIds.has(priceInfo.gameId)) { // Проверяем, что gameId определен и не обработан
-                const game = await SteamGame. findOne({ where: { id: priceInfo.gameId } });
+            if (priceInfo.game_id && !processedGameIds.has(priceInfo.game_id)) { // Проверяем, что game_id определен и не обработан
+                const game = await SteamGame. findOne({ where: { id: priceInfo.game_id } });
                 if (game) {
-                    const existingPrice = await SteamPrice.findOne({ where: { gameId: game.id } });
+                    const existingPrice = await SteamPrice.findOne({ where: { game_id: game.id } });
                     if (!existingPrice) {
                         const priceFloat = parseFloat(priceInfo.priceGame);
                         //не считывает 0, так как для js 0 - это ложное значение
                         if (!Number.isNaN(priceFloat)) { 
                             await SteamPrice.create({
-                                gameId: game.id,
+                                game_id: game.id,
                                 price: priceFloat
                             });
-                            // Добавляем gameId в множество обработанных
-                            processedGameIds.add(priceInfo.gameId);
+                            // Добавляем game_id в множество обработанных
+                            processedGameIds.add(priceInfo.game_id);
                         } else {
-                            console.log(`Не удалось преобразовать цену ${priceInfo.priceGame} в float для gameId: ${priceInfo.gameId}`);
+                            console.log(`Не удалось преобразовать цену ${priceInfo.priceGame} в float для game_id: ${priceInfo.game_id}`);
                         }
                     }
                 }
@@ -124,18 +98,18 @@ async function connectSteamGames() {
 
         //заполнение таблицы steam_top_sellers
         for (const topGame of topGamesData) {
-            // Проверяем, что gameId определен и не обработан
+            // Проверяем, что game_id определен и не обработан
             if (topGame.title && !processedTopGamesIds.has(topGame.title)) {
                 const game = await SteamGame. findOne({ where: { title: topGame.title } });
                 if (game) {
-                    // Проверяем, существует ли уже запись с таким gameId в таблице SteamTopGame 
-                    const existingTopSeller = await SteamTopGame .findOne({ where: { gameId: game.id } });
+                    // Проверяем, существует ли уже запись с таким game_id в таблице SteamTopGame 
+                    const existingTopSeller = await SteamTopGame .findOne({ where: { game_id: game.id } });
 
                     // Если запись не существует, создаем новую
                     if (!existingTopSeller) {
                         await SteamTopGame .create({
-                            gameId: game.id, // Используем id из таблицы SteamGame
-                             position: topGame.position, // Позиция из топ-списка
+                            game_id: game.id, // Используем id из таблицы SteamGame
+                            position: topGame.position, // Позиция из топ-списка
                         });
 
                         // Добавляем title в множество обработанных, чтобы избежать дублирования

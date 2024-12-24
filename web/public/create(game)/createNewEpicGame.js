@@ -16,7 +16,6 @@ function CreateGame() {
     "description": description || '-',
     "release_date": release_date || '-',
     "genres": genres || '-',
-    "platform": "Epic Games",
     "developer": developer || '-',
     "publisher": publisher || '-',
     "supported_os": supported_os || '-',

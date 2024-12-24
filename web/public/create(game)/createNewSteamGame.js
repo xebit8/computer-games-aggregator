@@ -19,7 +19,6 @@ function CreateGame() {
     "description": description || '-',
     "release_date": release_date || '-',
     "genres": genres || '-',
-    "platform": "Steam",
     "developer": developer || '-',
     "publisher": publisher || '-',
     "min_system_requirements": min_system_requirements || '-',

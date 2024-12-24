@@ -1,6 +1,6 @@
 $(document).ready(function () {
-  function checkIfFavourite(gameId, platformId) {
-    return $.get('/favourites/check', { game_id: gameId, platform_id: platformId })
+  function checkIfFavourite(game_id, platform) {
+    return $.get('/favourites/check', { game_id: game_id, platform: platform })
       .then(function (response) {
         return response.isFavourite;
       })
@@ -10,10 +10,10 @@ $(document).ready(function () {
   }
 
   $('.add-to-favourite').each(async function () {
-    const gameId = $(this).data('game-id');
-    const platformId = $(this).data('platform-id');
+    const game_id = $(this).data('game-id');
+    const platform = $(this).data('platform');
 
-    const isFavourite = await checkIfFavourite(gameId, platformId);
+    const isFavourite = await checkIfFavourite(game_id, platform);
 
     if (isFavourite) {
       $(this).prop('disabled', true);
@@ -23,10 +23,10 @@ $(document).ready(function () {
   });
 
   $('.add-to-favourite').on('click', function () {
-    const gameId = $(this).data('game-id');
-    const platformId = $(this).data('platform-id');
+    const game_id = $(this).data('game-id');
+    const platform = $(this).data('platform');
 
-    $.post('/favourites', { game_id: gameId, platform_id: platformId }, function (response) {
+    $.post('/favourites', { game_id: game_id, platform: platform }, function (response) {
       alert('Игра добавлена в избранное!');
       $(this).prop('disabled', true);
     }).fail(function () {
